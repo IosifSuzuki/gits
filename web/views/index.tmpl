@@ -1,0 +1,20 @@
+{{ define "views/index.tmpl" }}
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+</head>
+<body>
+    {{ template "layouts/header.tmpl" .}}
+    <main class="my-page-content">
+        <div class="container">
+            <ul class="my-post-list">
+                {{ template "layouts/postItem.tmpl" .}}
+            </ul>
+        </div>
+    </main>
+    {{ template "layouts/footer.tmpl" . }}
+    {{ template "layouts/scripts.tmpl" .}}
+</body>
+</html>
+{{ end }}

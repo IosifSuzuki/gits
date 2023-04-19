@@ -1,0 +1,27 @@
+{{ define "layouts/footer.tmpl" }}
+<footer class="my-footer">
+    <div class="container">
+        <div class="my-3">
+            <p class="my-center">Inspired by <a class="my-post-link" href="https://github.com/khorbushko">Kyryl Horbushko</a></p>
+            <p class="my-center">{{.now.UTC.Year}}</p>
+            <ul class="my-social-media-list">
+                <li class="d-inline-block">
+                    <a href="https://github.com/IosifSuzuki">
+                        <img class="my-social-media-item" src="assets/social-icons/github.svg" alt="social media icon">
+                    </a>
+                </li>
+                <li class="my-social-media-item d-inline-block">
+                    <a href="mailto:iosifsuzuki@gmail.com">
+                        <img class="my-social-media-item" src="assets/social-icons/gmail.svg" alt="social media icon">
+                    </a>
+                </li>
+                <li class="my-social-media-item d-inline-block">
+                    <a href="https://www.linkedin.com/in/bohdan-petkanich-136b45222/">
+                        <img class="my-social-media-item" src="assets/social-icons/linkedin.svg" alt="social media icon">
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+{{ end }}

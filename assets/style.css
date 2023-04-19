@@ -1,0 +1,127 @@
+:root {
+    --textColor: #424242;
+    --descriptionColor: #828282;
+    --linkColor: #1756a9;
+}
+
+body {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    color: var(--textColor);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.my-main-navbar {
+    border-bottom: 1px solid rgb(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.my-navbar-logo {
+    text-transform: uppercase;
+}
+
+.my-font-weight-bold {
+    font-weight: 700;
+}
+
+.my-center {
+    text-align: center;
+}
+.my-text-right {
+    text-align: right;
+}
+
+.my-reboot-ul {
+    margin: 0;
+    padding: 0;
+}
+
+.my-nav-option-link {
+    font-size: 15px;
+    text-decoration: none;
+    color: #424242;
+    display: block;
+}
+
+.my-nav-option-link:hover {
+    text-decoration: underline;
+    color: var(--textColor);
+}
+
+.my-page-content {
+    padding: 30px 0;
+    flex: 1 0 auto;
+}
+
+.my-date {
+    font-size: 14px;
+    color: var(--descriptionColor);
+}
+
+.my-post-link {
+    color: var(--linkColor);
+    text-decoration: none;
+}
+
+.my-h {
+    margin-bottom: 15px;
+}
+
+.my-h1 {
+    font-size: 36px;
+    font-weight: 400;
+}
+
+.my-p {
+    margin-bottom: 15px;
+}
+
+.my-post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.my-post-list > li {
+    margin-bottom: 30px;
+}
+
+.my-footer {
+    border-top: 1px solid rgb(0, 0, 0, 0.1);
+}
+
+.my-social-media-list {
+    list-style: none;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+}
+.my-social-media-item {
+    width: 20px;
+    height: 20px;
+}
+
+.my-cover {
+    display: table;
+    text-align: center;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.my-small-description {
+    color: var(--descriptionColor);
+    font-size: 14px;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+.my-plain-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+

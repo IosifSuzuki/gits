@@ -1,0 +1,30 @@
+{{ define "views/article.tmpl" }}
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+    <link rel="stylesheet" href="/assets/markdown.css" />
+</head>
+<body>
+    {{ template "layouts/header.tmpl" .}}
+    <main class="my-page-content">
+        <div class="container">
+            <h1 class="my-h1 my-h">Middleware</h1>
+            <p class="my-p my-small-description text-start float-start">April 5, 2023 • bogdan petkanich, Uzhgorod, Ukraine</p>
+            <p class="text-end">Estimated reading time: 3 minutes</p>
+            <ul class="my-plain-ul">
+                <li class="badge text-bg-dark">Go</li>
+                <li class="badge text-bg-dark">gorilla/mux</li>
+                <li class="badge text-bg-dark">Server</li>
+                <li class="badge text-bg-dark">middleware</li>
+            </ul>
+            <article class="markdown-body my-page-content">
+                {{ .article }}
+            </article>
+        </div>
+    </main>
+    {{ template "layouts/footer.tmpl" . }}
+    {{ template "layouts/scripts.tmpl" .}}
+</body>
+</html>
+{{ end }}

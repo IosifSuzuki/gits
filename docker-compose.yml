@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  server:
+    container_name: "gits-server"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - data:/usr/src/app/
+    networks:
+      - local-network
+    ports:
+      - '8080:8080'
+
+networks:
+  local-network:
+    driver: bridge
+
+volumes:
+  data:

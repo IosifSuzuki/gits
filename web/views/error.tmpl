@@ -1,0 +1,17 @@
+{{ define "views/error.tmpl" }}
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+    <link rel="stylesheet" href="/assets/error.css">
+</head>
+<body>
+<main class="my-cover">
+    <div class="my-error">
+        <h1>Error {{ .httpCode }}</h1>
+    </div>
+</main>
+{{ template "layouts/scripts.tmpl" .}}
+</body>
+</html>
+{{ end }}
