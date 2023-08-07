@@ -1,4 +1,4 @@
-package services
+package service
 
 import "gits/internal/model/html"
 

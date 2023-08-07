@@ -1,0 +1,41 @@
+{{ define "views/newArticle.tmpl" }}
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+</head>
+<body>
+<main class="container">
+    <div class="d-flex align-items-center justify-content-center my-full-height">
+        <form action="/unknown" class="my-half-container" method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title article</label>
+                <input type="text" class="form-control" id="title" placeholder="title article">
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">Select categories</label>
+                <select id="category" class="form-select" data-max-options="3" multiple>
+                    <option value="0">Zero</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="md_file" class="form-label">MarkDown file</label>
+                <input class="form-control" type="file" id="md_file">
+            </div>
+            <div class="mb-3">
+                <label for="attachments" class="form-label">Attachment files</label>
+                <input class="form-control" type="file" id="attachments" multiple>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-dark btn-block">Submit</button>
+            </div>
+        </form>
+    </div>
+</main>
+{{ template "layouts/scripts.tmpl" .}}
+</body>
+</html>
+{{ end }}

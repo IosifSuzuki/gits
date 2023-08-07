@@ -7,12 +7,40 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    depends_on:
+      - database
+      - cache
+    env_file:
+      - .env
     volumes:
       - data:/usr/src/app/
     networks:
       - local-network
     ports:
-      - '8080:8080'
+      - '${HOST_PORT}:${HOST_PORT}'
+
+  database:
+    container_name: "gits-postgresql"
+    image: postgres:alpine
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - local-network
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  cache:
+    container_name: "gits-redis"
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - data:/usr/src/cache/
 
 networks:
   local-network:

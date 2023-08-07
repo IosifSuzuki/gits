@@ -124,4 +124,15 @@ body {
     margin: 0;
 }
 
+.my-auth-form {
+    height: 100%;
+}
+
+.my-full-height {
+    min-height: 100vh;
+}
+
+.my-half-container {
+    width: 50%;
+}
 

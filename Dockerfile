@@ -11,7 +11,7 @@ RUN go mod tidy
 
 COPY . .
 
-RUN go build -o main cmd/main.go
+RUN go build -o main cmd/server/main.go
 
 FROM alpine:latest
 
@@ -21,7 +21,5 @@ COPY --from=BuildStage app/configs/config.yml /configs/config.yml
 COPY --from=BuildStage app/web /web
 COPY --from=BuildStage app/assets /assets
 COPY --from=BuildStage app/main /main
-
-EXPOSE 8080
 
 CMD ["./main"]

@@ -3,8 +3,12 @@ package app
 import (
 	"gits/internal/container"
 	"gits/internal/controller"
+	"gits/internal/middleware"
 	"gits/internal/model"
-	"gits/internal/services"
+	"gits/internal/provider"
+	"gits/internal/router"
+	"gits/internal/service"
+	"gits/pkg/logger"
 )
 
 func Run() error {
@@ -12,9 +16,19 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	box := container.NewContainer(conf)
-	md := services.NewMD()
-	publisher := services.NewPublisher(md)
-	c := controller.NewController(box, publisher)
-	return c.SetupHandlers()
+	log := logger.NewLogger(logger.DebugLevel)
+	box := container.NewContainer(conf, log)
+	storageProvider, err := provider.NewStorage(box)
+	if err != nil {
+		return err
+	}
+	storageService := service.NewStorage(box, storageProvider)
+	cacheProvider := provider.NewCache(box)
+	sessionService := service.NewSession(box, cacheProvider)
+	md := service.NewMD()
+	publisher := service.NewPublisher(md)
+	mainController := controller.NewMainController(box, storageService, sessionService)
+	authMiddleware := middleware.NewAuth(box, sessionService)
+	r := router.NewRouter(box, publisher, mainController, authMiddleware)
+	return r.SetupHandlers()
 }

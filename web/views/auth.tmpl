@@ -1,0 +1,28 @@
+{{ define "views/auth.tmpl" }}
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+</head>
+<body>
+<main class="container">
+    <div class="d-flex align-items-center justify-content-center my-full-height">
+        <form action="/auth" class="my-half-container" method="post">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="username" id="username">
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="password" id="password">
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-dark btn-block">Submit</button>
+            </div>
+        </form>
+    </div>
+</main>
+{{ template "layouts/scripts.tmpl" .}}
+</body>
+</html>
+{{ end }}

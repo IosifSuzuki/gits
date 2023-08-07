@@ -30,7 +30,7 @@ go.work
 /assets/articles
 
 # config file
-/internal/model/config.go
+/configs/config.yml
 
 .idea
 # End of https://www.toptal.com/developers/gitignore/api/go
