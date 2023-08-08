@@ -29,6 +29,7 @@ func Run() error {
 	publisher := service.NewPublisher(md)
 	mainController := controller.NewMainController(box, storageService, sessionService)
 	authMiddleware := middleware.NewAuth(box, sessionService)
-	r := router.NewRouter(box, publisher, mainController, authMiddleware)
+	errorHandlerMiddleware := middleware.NewErrorHandler(box)
+	r := router.NewRouter(box, publisher, mainController, authMiddleware, errorHandlerMiddleware)
 	return r.SetupHandlers()
 }

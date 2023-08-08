@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS tag;
+DROP TABLE IF EXISTS article;
+DROP TABLE IF EXISTS article_tag;
+DROP TABLE IF EXISTS attachment;
+DROP TABLE IF EXISTS article_attachment;

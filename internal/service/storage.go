@@ -12,6 +12,7 @@ import (
 
 type Storage interface {
 	AccountByCredential(credential *app.Credential) (*app.Account, error)
+	AvailableCategories() ([]app.Category, error)
 }
 
 type storage struct {
@@ -50,4 +51,22 @@ func (s *storage) AccountByCredential(credential *app.Credential) (*app.Account,
 		Role:         app.ParseString(string(account.Role)),
 	}
 	return &appAccount, nil
+}
+
+func (s *storage) AvailableCategories() ([]app.Category, error) {
+	conn := s.storageProvider.GetConnection()
+
+	var categories []stor.Category
+
+	if err := conn.Find(&categories).Error; err != nil {
+		return nil, err
+	}
+	appCategories := make([]app.Category, 0, len(categories))
+	for _, category := range categories {
+		appCategories = append(appCategories, app.Category{
+			Id:    int(category.ID),
+			Title: category.Title,
+		})
+	}
+	return appCategories, nil
 }

@@ -24,22 +24,26 @@ type Router interface {
 }
 
 type router struct {
-	container      container.Container
-	publisher      service.Publisher
-	mainController controller.MainController
-	authMiddleware middleware.Auth
+	container              container.Container
+	publisher              service.Publisher
+	mainController         controller.MainController
+	authMiddleware         middleware.Auth
+	errorHandlerMiddleware middleware.ErrorHandler
 }
 
 func NewRouter(
 	container container.Container,
 	publisher service.Publisher,
 	mainController controller.MainController,
-	authMiddleware middleware.Auth) Router {
+	authMiddleware middleware.Auth,
+	errorHandlerMiddleware middleware.ErrorHandler,
+) Router {
 	return &router{
-		container:      container,
-		publisher:      publisher,
-		mainController: mainController,
-		authMiddleware: authMiddleware,
+		container:              container,
+		publisher:              publisher,
+		mainController:         mainController,
+		authMiddleware:         authMiddleware,
+		errorHandlerMiddleware: errorHandlerMiddleware,
 	}
 }
 
@@ -51,7 +55,7 @@ func (r *router) SetupHandlers() error {
 	h := gin.New()
 	h.Use(gin.Logger())
 	h.Use(gin.Recovery())
-	h.Use(r.Error)
+	h.Use(r.errorHandlerMiddleware.Error())
 	h.GET("/", r.Index)
 	h.GET("/articles", r.Index)
 	h.GET("/article", r.Article)
@@ -91,16 +95,6 @@ func (r *router) Article(ctx *gin.Context) {
 		"now":     time.Now(),
 		"article": template.HTML(a.Content),
 	})
-}
-
-func (r *router) Error(ctx *gin.Context) {
-	ctx.Next()
-	httpCode := ctx.Writer.Status()
-	if httpCode < 200 || httpCode >= 300 {
-		ctx.HTML(httpCode, "views/error.tmpl", gin.H{
-			"httpCode": httpCode,
-		})
-	}
 }
 
 func (r *router) Authentication(ctx *gin.Context) {
@@ -145,6 +139,12 @@ func (r *router) NewArticle(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
+	newArticle, err := r.mainController.NewArticle(account)
+	if err != nil {
+		log.Error("NewArticle has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	log.Debug("account has gain access to create new post", zap.Int("accountId", account.Id))
-	ctx.HTML(http.StatusOK, "views/newArticle.tmpl", nil)
+	ctx.HTML(http.StatusOK, "views/newArticle.tmpl", newArticle)
 }

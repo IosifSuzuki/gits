@@ -7,6 +7,7 @@ type Account struct {
 	Role         Role
 	Username     string
 	HashPassword string
+	Article      []Article `gorm:"foreignKey:PublisherId"`
 }
 
 func (a *Account) TableName() string {

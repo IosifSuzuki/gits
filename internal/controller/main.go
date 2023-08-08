@@ -5,6 +5,7 @@ import (
 	"gits/internal/container"
 	"gits/internal/model/app"
 	"gits/internal/model/form"
+	"gits/internal/model/html"
 	"gits/internal/model/response"
 	"gits/internal/service"
 	"go.uber.org/zap"
@@ -18,6 +19,7 @@ type mainController struct {
 
 type MainController interface {
 	Auth(authentication *form.Authentication) (*response.AuthSessionResponse, error)
+	NewArticle(account *app.Account) (*html.NewArticle, error)
 }
 
 func NewMainController(container container.Container, storage service.Storage, session service.Session) MainController {
@@ -50,4 +52,25 @@ func (m *mainController) Auth(authentication *form.Authentication) (*response.Au
 	return &response.AuthSessionResponse{
 		SessionId: accountSession.SessionId,
 	}, nil
+}
+
+func (m *mainController) NewArticle(account *app.Account) (*html.NewArticle, error) {
+	log := m.GetLogger()
+
+	categories, err := m.Storage.AvailableCategories()
+	if err != nil {
+		log.Error("retrieve available categories has failed", zap.Error(err))
+		return nil, err
+	}
+	resCategories := make([]response.Category, 0, len(categories))
+	for _, category := range categories {
+		resCategories = append(resCategories, response.Category{
+			Id:    category.Id,
+			Title: category.Title,
+		})
+	}
+	return &html.NewArticle{
+		PublisherName:       account.Username,
+		AvailableCategories: resCategories,
+	}, err
 }
