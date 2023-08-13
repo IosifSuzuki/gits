@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS tag(
+CREATE TABLE IF NOT EXISTS category(
     id SERIAL PRIMARY KEY,
     title TEXT UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -24,22 +24,22 @@ FOREIGN KEY (publisher_id)
 REFERENCES account(id)
 ON DELETE CASCADE;
 
-CREATE TABLE IF NOT EXISTS article_tag(
+CREATE TABLE IF NOT EXISTS article_category(
     article_id INT,
-    tag_id INT,
-    PRIMARY KEY (article_id, tag_id)
+    category_id INT,
+    PRIMARY KEY (article_id, category_id)
 );
 
-ALTER TABLE article_tag
+ALTER TABLE article_category
 ADD CONSTRAINT fk_article_id
 FOREIGN KEY (article_id)
 REFERENCES article(id)
 ON DELETE CASCADE;
 
-ALTER TABLE article_tag
-ADD CONSTRAINT fk_tag_id
-FOREIGN KEY (tag_id)
-REFERENCES tag(id)
+ALTER TABLE article_category
+ADD CONSTRAINT fk_category_id
+FOREIGN KEY (category_id)
+REFERENCES category(id)
 ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS attachment (

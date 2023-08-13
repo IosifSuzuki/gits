@@ -1,4 +1,4 @@
-package app
+package html
 
 type Category struct {
 	Id    int

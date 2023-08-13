@@ -1,4 +1,0 @@
-server:
-  secret_key: "CzMHiyY8hCM57Q5N3ic4XvXgeOShRbDQ"
-cache:
-  session_ttl: 60s

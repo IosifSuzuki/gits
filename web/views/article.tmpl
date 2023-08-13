@@ -9,17 +9,16 @@
     {{ template "layouts/header.tmpl" .}}
     <main class="my-page-content">
         <div class="container">
-            <h1 class="my-h1 my-h">Middleware</h1>
-            <p class="my-p my-small-description text-start float-start">April 5, 2023 • bogdan petkanich, Uzhgorod, Ukraine</p>
-            <p class="text-end">Estimated reading time: 3 minutes</p>
+            <h1 class="my-h1 my-h">{{ .article.Title }}</h1>
+            <p class="my-p my-small-description text-start float-start">{{  "January 02, 2006" | DateFormat .article.Date }} • {{ .article.Author.FullName }}, {{ .article.Location }}</p>
+            <p class="text-end">Estimated reading time: {{ .article.ReadingTimeText }} </p>
             <ul class="my-plain-ul">
-                <li class="badge text-bg-dark">Go</li>
-                <li class="badge text-bg-dark">gorilla/mux</li>
-                <li class="badge text-bg-dark">Server</li>
-                <li class="badge text-bg-dark">middleware</li>
+                {{range .article.Categories }}
+                    <li class="badge text-bg-dark">{{ .Title }}</li>
+                {{ end }}
             </ul>
             <article class="markdown-body my-page-content">
-                {{ .article }}
+                {{ .article.Content }}
             </article>
         </div>
     </main>

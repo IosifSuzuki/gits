@@ -10,7 +10,8 @@ import (
 	"gits/internal/model/app"
 	"gits/internal/model/constant"
 	"gits/internal/model/form"
-	"gits/internal/service"
+	"gits/internal/model/request"
+	"gits/internal/utils"
 	valid "gits/internal/validator"
 	"go.uber.org/zap"
 	"html/template"
@@ -25,7 +26,6 @@ type Router interface {
 
 type router struct {
 	container              container.Container
-	publisher              service.Publisher
 	mainController         controller.MainController
 	authMiddleware         middleware.Auth
 	errorHandlerMiddleware middleware.ErrorHandler
@@ -33,14 +33,12 @@ type router struct {
 
 func NewRouter(
 	container container.Container,
-	publisher service.Publisher,
 	mainController controller.MainController,
 	authMiddleware middleware.Auth,
 	errorHandlerMiddleware middleware.ErrorHandler,
 ) Router {
 	return &router{
 		container:              container,
-		publisher:              publisher,
 		mainController:         mainController,
 		authMiddleware:         authMiddleware,
 		errorHandlerMiddleware: errorHandlerMiddleware,
@@ -58,14 +56,16 @@ func (r *router) SetupHandlers() error {
 	h.Use(r.errorHandlerMiddleware.Error())
 	h.GET("/", r.Index)
 	h.GET("/articles", r.Index)
-	h.GET("/article", r.Article)
+	h.GET("/article/:id", r.Article)
 	h.GET("/auth", r.Authentication)
 	h.POST("/auth", r.AuthenticationPOST)
 	adminPanel := h.Group("/admin")
 	adminPanel.Use(r.authMiddleware.Authorization())
 	{
 		adminPanel.GET("/new/article", r.NewArticle)
+		adminPanel.POST("/new/article", r.NewArticlePOST)
 	}
+	r.registerTemplateFunction(h)
 	h.LoadHTMLGlob("web/**/*")
 	h.Static("/assets", "./assets")
 	return h.Run(conf.Server.Address())
@@ -83,17 +83,45 @@ func (r *router) registerValidators() error {
 	return nil
 }
 
+func (r *router) registerTemplateFunction(e *gin.Engine) {
+	e.FuncMap = template.FuncMap{
+		"DateFormat": utils.DateFormat,
+	}
+}
+
 func (r *router) Index(ctx *gin.Context) {
+	log := r.container.GetLogger()
+
+	htmlArticles, err := r.mainController.Articles()
+	if err != nil {
+		log.Error("fetch articles has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	ctx.HTML(http.StatusOK, "views/index.tmpl", gin.H{
-		"now": time.Now(),
+		"now":      time.Now(),
+		"articles": htmlArticles,
 	})
 }
 
 func (r *router) Article(ctx *gin.Context) {
-	a, _ := r.publisher.Article()
+	log := r.container.GetLogger()
+
+	var articleRequest request.Article
+	if err := ctx.ShouldBindUri(&articleRequest); err != nil {
+		log.Error("bind uri has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	htmlArticle, err := r.mainController.Article(&articleRequest)
+	if err != nil {
+		log.Error("article by id has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	ctx.HTML(http.StatusOK, "views/article.tmpl", gin.H{
 		"now":     time.Now(),
-		"article": template.HTML(a.Content),
+		"article": htmlArticle,
 	})
 }
 
@@ -147,4 +175,35 @@ func (r *router) NewArticle(ctx *gin.Context) {
 	}
 	log.Debug("account has gain access to create new post", zap.Int("accountId", account.Id))
 	ctx.HTML(http.StatusOK, "views/newArticle.tmpl", newArticle)
+}
+
+func (r *router) NewArticlePOST(ctx *gin.Context) {
+	log := r.container.GetLogger()
+
+	accountValue, ok := ctx.Get(constant.AccountAppKey)
+	if !ok {
+		log.Error("can't retrieve account model from context")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	account, ok := accountValue.(*app.Account)
+	if !ok {
+		log.Error("can't cast to account model from context value")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	var newArticleForm form.NewArticle
+	if err := ctx.Bind(&newArticleForm); err != nil {
+		log.Error("bind form has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := r.mainController.PostNewArticle(account, &newArticleForm); err != nil {
+		log.Error("post new article has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Redirect(http.StatusSeeOther, "/articles")
 }

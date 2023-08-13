@@ -9,7 +9,9 @@
     <main class="my-page-content">
         <div class="container">
             <ul class="my-post-list">
-                {{ template "layouts/postItem.tmpl" .}}
+                {{ range .articles }}
+                    {{ template "layouts/postItem.tmpl" .}}
+                {{ end }}
             </ul>
         </div>
     </main>

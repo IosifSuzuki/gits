@@ -1,6 +1,10 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"golang.org/x/crypto/bcrypt"
+	"strings"
+	"time"
+)
 
 func HashPassword(password string) (*string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
@@ -19,4 +23,19 @@ func CompareHashAndPassword(hash string, password string) (bool, error) {
 		return false, err
 	}
 	return true, err
+}
+
+func DateFormat(time time.Time, format string) string {
+	return time.Format(format)
+}
+
+func PrefixString(text string, words int) string {
+	parts := strings.Split(text, " ")
+	var actualWords int
+	if len(parts)-1 > words {
+		actualWords = words
+	} else {
+		actualWords = len(parts) - 1
+	}
+	return strings.Join(parts[:actualWords], " ")
 }
