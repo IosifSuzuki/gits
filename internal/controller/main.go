@@ -16,12 +16,13 @@ import (
 	"go.uber.org/zap"
 	"html/template"
 	"io"
+	"strings"
 )
 
 type mainController struct {
 	container.Container
 	service.Storage
-	service.Session
+	service.AccountSession
 	service.DecompressorFile
 	service.AttachmentStorage
 	service.MD
@@ -38,7 +39,7 @@ type MainController interface {
 func NewMainController(
 	container container.Container,
 	storage service.Storage,
-	session service.Session,
+	session service.AccountSession,
 	decompressorFile service.DecompressorFile,
 	attachmentStorage service.AttachmentStorage,
 	md service.MD,
@@ -46,7 +47,7 @@ func NewMainController(
 	return &mainController{
 		Container:         container,
 		Storage:           storage,
-		Session:           session,
+		AccountSession:    session,
 		DecompressorFile:  decompressorFile,
 		AttachmentStorage: attachmentStorage,
 		MD:                md,
@@ -66,7 +67,7 @@ func (m *mainController) Auth(authentication *form.Authentication) (*response.Au
 		log.Error("retrieve account by credential has failed", zap.Error(err))
 		return nil, err
 	}
-	accountSession, err := m.Session.CreateAccountSession(ctx, account)
+	accountSession, err := m.AccountSession.CreateAccountSession(ctx, account)
 	if err != nil {
 		log.Error("create session has failed", zap.Error(err))
 		return nil, err
@@ -100,6 +101,7 @@ func (m *mainController) NewArticle(account *app.Account) (*html.NewArticle, err
 
 func (m *mainController) PostNewArticle(account *app.Account, form *form.NewArticle) error {
 	log := m.GetLogger()
+
 	file, err := form.ZipFile.Open()
 	if err != nil {
 		log.Error("open zip file has failed", zap.Error(err))
@@ -118,22 +120,24 @@ func (m *mainController) PostNewArticle(account *app.Account, form *form.NewArti
 		log.Debug("zip file contains", zap.String("filename", filename))
 	}
 	newAttachmentIdentifiers := make(map[string]string)
+	folderName := strings.ToLower(*form.Title)
+	folderName = strings.Join(strings.Split(folderName, " "), "_")
 	for attachmentPath, attachmentReader := range articleFiles.Attachments {
 		identifier, err := uuid.NewRandom()
+		filePath := folderName + "/" + identifier.String()
 		if err != nil {
 			log.Error("create new uuid random has failed", zap.Error(err))
 			return err
 		}
-		newAttachmentIdentifiers[attachmentPath] = identifier.String()
-		ok, err := m.UploadAttachment(attachmentReader, newAttachmentIdentifiers[attachmentPath])
+		newPath, err := m.AttachmentStorage.UploadAttachment(attachmentReader, filePath)
 		if err != nil {
 			log.Error("upload attachment has failed", zap.Error(err))
 			return err
-		} else if !ok {
-			err = errs.UnsuccessfulUploadAttachmentError
-			log.Error("upload attachment has failed", zap.Error(err))
-			return err
+		} else if newPath == nil {
+			log.Error("upload attachment return empty path", zap.Error(err))
+			return errs.NilError
 		}
+		newAttachmentIdentifiers[attachmentPath] = *newPath
 	}
 	mdFileData, err := io.ReadAll(articleFiles.MDFile)
 	if err != nil {

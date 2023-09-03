@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  server:
+    container_name: "gits-server"
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - database
+      - cache
+    env_file:
+      - .env
+    volumes:
+      - data:/usr/src/app/
+    networks:
+      - local-network
+    ports:
+      - '${HOST_PORT}:${HOST_PORT}'
+
+  cache:
+    container_name: "gits-redis"
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - data:/usr/src/cache/
+
+networks:
+  local-network:
+    driver: bridge
+
+volumes:
+  data:

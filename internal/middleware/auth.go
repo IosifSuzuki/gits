@@ -17,13 +17,13 @@ type Auth interface {
 
 type auth struct {
 	container.Container
-	service.Session
+	service.AccountSession
 }
 
-func NewAuth(container container.Container, session service.Session) Auth {
+func NewAuth(container container.Container, session service.AccountSession) Auth {
 	return &auth{
-		Container: container,
-		Session:   session,
+		Container:      container,
+		AccountSession: session,
 	}
 }
 
@@ -40,7 +40,7 @@ func (a *auth) Authorization() gin.HandlerFunc {
 		accountSession := app.AccountSession{
 			SessionId: sessionId,
 		}
-		account, err := a.Session.RetrieveAccountSession(sessionCtx, &accountSession)
+		account, err := a.AccountSession.RetrieveAccountSession(sessionCtx, &accountSession)
 		if err != nil {
 			log.Error("session doesn't exist", zap.Error(err))
 			ctx.AbortWithStatus(http.StatusUnauthorized)

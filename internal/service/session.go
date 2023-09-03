@@ -13,24 +13,24 @@ import (
 	"time"
 )
 
-type Session interface {
+type AccountSession interface {
 	CreateAccountSession(ctx context.Context, account *app.Account) (*app.AccountSession, error)
 	RetrieveAccountSession(ctx context.Context, accountSession *app.AccountSession) (*app.Account, error)
 }
 
-type session struct {
+type accountSession struct {
 	container     container.Container
 	cacheProvider provider.Cache
 }
 
-func NewSession(container container.Container, cache provider.Cache) Session {
-	return &session{
+func NewSession(container container.Container, cache provider.Cache) AccountSession {
+	return &accountSession{
 		container:     container,
 		cacheProvider: cache,
 	}
 }
 
-func (s *session) CreateAccountSession(ctx context.Context, account *app.Account) (*app.AccountSession, error) {
+func (s *accountSession) CreateAccountSession(ctx context.Context, account *app.Account) (*app.AccountSession, error) {
 	uuidKey := uuid.New()
 	conf := s.container.GetConfig()
 	ttl := conf.Cache.SessionTTL
@@ -43,7 +43,7 @@ func (s *session) CreateAccountSession(ctx context.Context, account *app.Account
 	}, nil
 }
 
-func (s *session) RetrieveAccountSession(ctx context.Context, accountSession *app.AccountSession) (*app.Account, error) {
+func (s *accountSession) RetrieveAccountSession(ctx context.Context, accountSession *app.AccountSession) (*app.Account, error) {
 	var (
 		account app.Account
 		uuidKey = accountSession.SessionId
@@ -54,34 +54,34 @@ func (s *session) RetrieveAccountSession(ctx context.Context, accountSession *ap
 	return &account, nil
 }
 
-func (s *session) SaveJSONData(ctx context.Context, value interface{}, key string, ttl time.Duration) error {
+func (s *accountSession) SaveJSONData(ctx context.Context, value interface{}, key string, ttl time.Duration) error {
 	log := s.container.GetLogger()
 	conn := s.cacheProvider.GetConnection()
 
 	jsonData, err := json.Marshal(value)
 	if err != nil {
-		log.Error("marshal json for session has failed", zap.Error(err))
+		log.Error("marshal json for accountSession has failed", zap.Error(err))
 		return err
 	}
 	resultCmd, err := conn.Set(ctx, key, jsonData, ttl).Result()
 	if err != nil {
-		log.Error("save value to session has failed", zap.Error(err))
+		log.Error("save value to accountSession has failed", zap.Error(err))
 		return err
 	}
-	log.Debug("save value to session has completed", zap.String("message", resultCmd))
+	log.Debug("save value to accountSession has completed", zap.String("message", resultCmd))
 	return nil
 }
 
-func (s *session) GetJSONData(ctx context.Context, key string, value interface{}) error {
+func (s *accountSession) GetJSONData(ctx context.Context, key string, value interface{}) error {
 	log := s.container.GetLogger()
 	conn := s.cacheProvider.GetConnection()
 
 	jsonText, err := conn.Get(ctx, key).Result()
 	if err == redis.Nil {
-		log.Error("session doesn't contains json in cache", zap.String("key-path", key))
+		log.Error("accountSession doesn't contains json in cache", zap.String("key-path", key))
 		return errs.NilError
 	} else if err != nil {
-		log.Error("session returns error when made get operation", zap.Error(err))
+		log.Error("accountSession returns error when made get operation", zap.Error(err))
 		return err
 	}
 	if err := json.Unmarshal([]byte(jsonText), value); err != nil {

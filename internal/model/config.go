@@ -16,6 +16,7 @@ type Config struct {
 	Server  Server `yaml:"server"`
 	Storage Storage
 	Cache   Cache `yaml:"cache"`
+	AWS     AWS   `yaml:"aws"`
 }
 
 type Server struct {
@@ -38,6 +39,11 @@ type Cache struct {
 	Port       string
 	Password   string
 	SessionTTL time.Duration `yaml:"session_ttl"`
+}
+
+type AWS struct {
+	S3Bucket string `yaml:"s3_bucket"`
+	S3Region string `yaml:"s3_region"`
 }
 
 func NewConfig() (*Config, error) {

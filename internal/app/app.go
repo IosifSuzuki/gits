@@ -27,7 +27,10 @@ func Run() error {
 	sessionService := service.NewSession(box, cacheProvider)
 	decompressorFile := service.NewDecompressorFile(box)
 	md := service.NewMD(box)
-	attachmentStorage := service.NewAttachmentStorage(box)
+	attachmentStorage, err := service.NewAttachmentStorage(box)
+	if err != nil {
+		return err
+	}
 	mainController := controller.NewMainController(box, storageService, sessionService, decompressorFile, attachmentStorage, md)
 	authMiddleware := middleware.NewAuth(box, sessionService)
 	errorHandlerMiddleware := middleware.NewErrorHandler(box)
