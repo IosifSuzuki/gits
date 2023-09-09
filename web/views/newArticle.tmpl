@@ -3,46 +3,50 @@
 <html lang="en">
 <head>
     {{ template "layouts/head.tmpl" .}}
+    <link rel="stylesheet" href="/assets/dashboard.css" />
 </head>
 <body>
-<main class="container">
-    <div class="d-flex align-items-center justify-content-center my-full-height">
-        <form action="/admin/new/article" class="my-half-container" method="post" enctype='multipart/form-data'>
-            <div class="mb-3">
-                <label for="publisher" class="form-label">Publisher</label>
-                <input type="text" class="form-control" name="publisher" id="publisher" value="{{.PublisherName}}" readonly>
+    <div class="d-flex">
+        {{ template "layouts/dashboardMenu.tmpl" "/admin/new/article" }}
+        <main class="container">
+            <div class="d-flex align-items-center justify-content-center my-full-height">
+                <form action="/admin/new/article" class="my-half-container" method="post" enctype='multipart/form-data'>
+                    <div class="mb-3">
+                        <label for="publisher" class="form-label">Publisher</label>
+                        <input type="text" class="form-control" name="publisher" id="publisher" value="{{.PublisherName}}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title of article</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="title article">
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" placeholder="Location">
+                    </div>
+                    <div class="mb-3">
+                        <label for="reading_estimate" class="form-label">Reading estimate (in minutes)</label>
+                        <input type="text" class="form-control" id="reading_estimate" name="reading_estimate" placeholder="reading estimate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Select categories</label>
+                        <select id="category" class="form-select" name="categories" multiple>
+                            {{range .AvailableCategories }}
+                            <option value="{{.Id}}">{{.Title}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="zip_file" class="form-label">ZIP file content</label>
+                        <input class="form-control" type="file" name="zip_file" id="zip_file">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark btn-block">Submit</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label for="title" class="form-label">Title of article</label>
-                <input type="text" class="form-control" id="title" name="title" placeholder="title article">
-            </div>
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input type="text" class="form-control" id="location" name="location" placeholder="Location">
-            </div>
-            <div class="mb-3">
-                <label for="reading_estimate" class="form-label">Reading estimate (in minutes)</label>
-                <input type="text" class="form-control" id="reading_estimate" name="reading_estimate" placeholder="reading estimate">
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Select categories</label>
-                <select id="category" class="form-select" name="categories" multiple>
-                    {{range .AvailableCategories }}
-                        <option value="{{.Id}}">{{.Title}}</option>
-                    {{end}}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="zip_file" class="form-label">ZIP file content</label>
-                <input class="form-control" type="file" name="zip_file" id="zip_file">
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-dark btn-block">Submit</button>
-            </div>
-        </form>
+        </main>
     </div>
-</main>
-{{ template "layouts/scripts.tmpl" .}}
+    {{ template "layouts/scripts.tmpl" .}}
 </body>
 </html>
 {{ end }}

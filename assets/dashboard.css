@@ -1,0 +1,44 @@
+:root {
+    --dahboard-link: #eee;
+    --dahboard-background: #000000;
+}
+
+.dashboard-content{
+    min-height: 100vh;
+    width: 100%;
+}
+
+.dashboard-side-menu {
+    min-width: 250px;
+    max-width: 250px;
+    background: var(--dahboard-background);
+}
+
+.dashboard-hr-color {
+    height: 1px;
+    background-color: var(--dahboard-link);
+    border: none;
+}
+
+.dashboard-side-menu li.active {
+    color: var(--dahboard-background);
+    background: var(--dahboard-link);
+    border-radius: 8px;
+}
+
+.dashboard-side-menu li.active a {
+    color: var(--dahboard-background);
+}
+
+.dashboard-link {
+    color: var(--dahboard-link);
+}
+
+.dashboard-link:hover {
+    color: var(--dahboard-link);
+}
+
+.dashboard-table-round {
+    border-radius: 6px;
+    overflow: hidden;
+}

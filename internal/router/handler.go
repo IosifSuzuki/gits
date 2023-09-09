@@ -64,6 +64,9 @@ func (r *router) SetupHandlers() error {
 	{
 		adminPanel.GET("/new/article", r.NewArticle)
 		adminPanel.POST("/new/article", r.NewArticlePOST)
+		adminPanel.GET("/new/category", r.NewCategory)
+		adminPanel.POST("/new/category", r.NewCategoryPOST)
+		adminPanel.GET("/actions", r.DashboardActions)
 	}
 	r.registerTemplateFunction(h)
 	h.LoadHTMLGlob("web/**/*")
@@ -206,4 +209,59 @@ func (r *router) NewArticlePOST(ctx *gin.Context) {
 	}
 
 	ctx.Redirect(http.StatusSeeOther, "/articles")
+}
+
+func (r *router) NewCategory(ctx *gin.Context) {
+	log := r.container.GetLogger()
+
+	accountValue, ok := ctx.Get(constant.AccountAppKey)
+	if !ok {
+		log.Error("can't retrieve account model from context")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	account, ok := accountValue.(*app.Account)
+	if !ok {
+		log.Error("can't cast to account model from context value")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	newCategory, err := r.mainController.NewCategory(account)
+	if err != nil {
+		log.Error("new category operation has failed", zap.Error(err))
+	}
+	ctx.HTML(http.StatusOK, "views/newCategory.tmpl", newCategory)
+}
+
+func (r *router) NewCategoryPOST(ctx *gin.Context) {
+	log := r.container.GetLogger()
+	accountValue, ok := ctx.Get(constant.AccountAppKey)
+	if !ok {
+		log.Error("can't retrieve account model from context")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	account, ok := accountValue.(*app.Account)
+	if !ok {
+		log.Error("can't cast to account model from context value")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+	var newCategory form.NewCategory
+	if err := ctx.Bind(&newCategory); err != nil {
+		log.Error("bind form has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	if err := r.mainController.CreateNewCategory(account, &newCategory); err != nil {
+		log.Error("create new category has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Redirect(http.StatusSeeOther, "/admin/new/category")
+}
+
+func (r *router) DashboardActions(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "views/actions.tmpl", nil)
 }

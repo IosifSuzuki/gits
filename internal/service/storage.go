@@ -18,6 +18,7 @@ type Storage interface {
 	CreateNewArticle(article *app.NewArticle) (bool, error)
 	RetrieveArticle(request *app.ArticleRequest) (*app.Article, error)
 	RetrieveArticles() ([]*app.Article, error)
+	CreateNewCategory(category *app.NewCategory) (bool, error)
 }
 
 type storage struct {
@@ -182,4 +183,20 @@ func (s *storage) RetrieveArticles() ([]*app.Article, error) {
 		})
 	}
 	return articles, nil
+}
+
+func (s *storage) CreateNewCategory(category *app.NewCategory) (bool, error) {
+	conn := s.storageProvider.GetConnection()
+	log := s.GetLogger()
+
+	storageCategory := stor.Category{
+		PublisherId: category.PublisherId,
+		Title:       category.Title,
+	}
+
+	if err := conn.Save(&storageCategory).Error; err != nil {
+		log.Error("save category has failed", zap.Error(err))
+		return false, err
+	}
+	return true, nil
 }

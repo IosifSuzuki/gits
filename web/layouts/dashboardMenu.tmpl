@@ -1,0 +1,18 @@
+{{ define "layouts/dashboardMenu.tmpl" }}
+
+<div class="dashboard-side-menu">
+    <div class="header-box">
+        <h4 class="px-2 py-2 text-center">Dashboard</h4>
+        <ul class="list-unstyled px-2">
+            <li {{ if eq . "/admin/new/article" }} class="active" {{ end }}><a href="/admin/new/article" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-signs-post"></i> Create post</a></li>
+            <li {{ if eq . "/admin/new/category" }} class="active" {{ end }} ><a href="/admin/new/category" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-tag"></i> Create category</a></li>
+            <li {{ if eq . "/admin/actions" }} class="active" {{ end }} ><a href="/admin/actions" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-location-arrow"></i> Actions</a></li>
+        </ul>
+        <hr class="dashboard-hr-color" />
+        <ul class="list-unstyled px-2">
+            <li><a href="/" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-chevron-left"></i> Back</a></li>
+        </ul>
+    </div>
+</div>
+
+{{ end }}

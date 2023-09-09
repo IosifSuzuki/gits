@@ -34,6 +34,8 @@ type MainController interface {
 	PostNewArticle(account *app.Account, form *form.NewArticle) error
 	Article(request *request.Article) (*html.Article, error)
 	Articles() ([]*html.PreviewArticle, error)
+	NewCategory(account *app.Account) (*html.NewCategory, error)
+	CreateNewCategory(account *app.Account, form *form.NewCategory) error
 }
 
 func NewMainController(
@@ -232,4 +234,35 @@ func (m *mainController) Articles() ([]*html.PreviewArticle, error) {
 		})
 	}
 	return previewArticles, nil
+}
+
+func (m *mainController) NewCategory(account *app.Account) (*html.NewCategory, error) {
+	log := m.GetLogger()
+
+	if account == nil {
+		err := errs.NilError
+		log.Error("account has nil value", zap.Error(err))
+		return nil, err
+	}
+	return &html.NewCategory{
+		PublisherName: account.Username,
+	}, nil
+}
+
+func (m *mainController) CreateNewCategory(account *app.Account, form *form.NewCategory) error {
+	log := m.GetLogger()
+
+	var newCategory = &app.NewCategory{
+		PublisherId: account.Id,
+		Title:       form.Title,
+	}
+	ok, err := m.Storage.CreateNewCategory(newCategory)
+	if !ok {
+		log.Error("create new category has completed unsuccessful")
+		return nil
+	} else if err != nil {
+		log.Error("create new category has failed", zap.Error(err))
+		return err
+	}
+	return nil
 }
