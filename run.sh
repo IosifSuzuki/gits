@@ -11,8 +11,8 @@ function main {
         docker-compose -f ./docker-compose.yml build --no-cache
         docker-compose -f ./docker-compose.yml up --force-recreate
     elif [ "$CMD" == "dev_up" ]; then
-        docker-compose -f ./dev-docker-compose.yml build --no-cache
-        docker-compose -f ./dev-docker-compose.yml up --force-recreate
+        docker compose -f ./dev-docker-compose.yml build --no-cache
+        docker compose -f ./dev-docker-compose.yml up --force-recreate
     elif [ "$CMD" == "stop" ]; then
         docker stop gits-server
         docker stop gits-redis
