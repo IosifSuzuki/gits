@@ -29,6 +29,10 @@ func DateFormat(time time.Time, format string) string {
 	return time.Format(format)
 }
 
+func Add(lsh, rhs int) int {
+	return lsh + rhs
+}
+
 func PrefixString(text string, words int) string {
 	parts := strings.Split(text, " ")
 	var actualWords int

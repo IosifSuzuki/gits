@@ -36,6 +36,7 @@ type MainController interface {
 	Articles() ([]*html.PreviewArticle, error)
 	NewCategory(account *app.Account) (*html.NewCategory, error)
 	CreateNewCategory(account *app.Account, form *form.NewCategory) error
+	ViewActions() ([]html.Action, error)
 }
 
 func NewMainController(
@@ -118,7 +119,7 @@ func (m *mainController) PostNewArticle(account *app.Account, form *form.NewArti
 		log.Error("cannot extract zip file", zap.Error(err))
 		return err
 	}
-	for filename, _ := range articleFiles.Attachments {
+	for filename := range articleFiles.Attachments {
 		log.Debug("zip file contains", zap.String("filename", filename))
 	}
 	newAttachmentIdentifiers := make(map[string]string)
@@ -265,4 +266,24 @@ func (m *mainController) CreateNewCategory(account *app.Account, form *form.NewC
 		return err
 	}
 	return nil
+}
+
+func (m *mainController) ViewActions() ([]html.Action, error) {
+	log := m.GetLogger()
+
+	observables, err := m.RetrieveObservables()
+	if err != nil {
+		log.Error("retrieve observables has failed", zap.Error(err))
+		return nil, err
+	}
+	actions := make([]html.Action, 0, len(observables))
+	for _, observable := range observables {
+		action, err := html.NewAction(observable)
+		if err != nil {
+			log.Error("create new action has failed", zap.Error(err))
+		} else if action != nil {
+			actions = append(actions, *action)
+		}
+	}
+	return actions, err
 }

@@ -2,6 +2,8 @@ server:
   secret_key: "secret_key"
 cache:
   session_ttl: 3600s
+ip_info:
+  token: "token"
 aws:
   s3_bucket: "s3_bucket"
   s3_region: "s3_region"

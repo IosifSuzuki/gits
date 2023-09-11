@@ -31,16 +31,7 @@ func (a *auth) Authorization() gin.HandlerFunc {
 	log := a.GetLogger()
 	sessionCtx := context.Background()
 	return func(ctx *gin.Context) {
-		sessionId, err := ctx.Cookie(constant.CookieSessionKey)
-		if err != nil {
-			log.Error("cookie doesn't have session", zap.Error(err))
-			ctx.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-		accountSession := app.AccountSession{
-			SessionId: sessionId,
-		}
-		account, err := a.AccountSession.RetrieveAccountSession(sessionCtx, &accountSession)
+		account, err := retrieveAccount(ctx, sessionCtx, a.AccountSession)
 		if err != nil {
 			log.Error("session doesn't exist", zap.Error(err))
 			ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -49,4 +40,15 @@ func (a *auth) Authorization() gin.HandlerFunc {
 		ctx.Set(constant.AccountAppKey, account)
 		ctx.Next()
 	}
+}
+
+func retrieveAccount(ctx *gin.Context, sessionCtx context.Context, accountSession service.AccountSession) (*app.Account, error) {
+	sessionId, err := ctx.Cookie(constant.CookieSessionKey)
+	if err != nil {
+		return nil, err
+	}
+	accountSessionModel := app.AccountSession{
+		SessionId: sessionId,
+	}
+	return accountSession.RetrieveAccountSession(sessionCtx, &accountSessionModel)
 }

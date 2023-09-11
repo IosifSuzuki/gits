@@ -7,8 +7,9 @@ type Account struct {
 	Role         Role
 	Username     string
 	HashPassword string
-	Article      []Article  `gorm:"foreignKey:PublisherId"`
-	Categories   []Category `gorm:"foreignKey:PublisherId"`
+	Article      []Article    `gorm:"foreignKey:PublisherId"`
+	Categories   []Category   `gorm:"foreignKey:PublisherId"`
+	Observables  []Observable `gorm:"foreignKey:AccountId"`
 }
 
 func (a *Account) TableName() string {

@@ -29,6 +29,7 @@ type router struct {
 	mainController         controller.MainController
 	authMiddleware         middleware.Auth
 	errorHandlerMiddleware middleware.ErrorHandler
+	observerMiddleware     middleware.Observer
 }
 
 func NewRouter(
@@ -36,12 +37,14 @@ func NewRouter(
 	mainController controller.MainController,
 	authMiddleware middleware.Auth,
 	errorHandlerMiddleware middleware.ErrorHandler,
+	observerMiddleware middleware.Observer,
 ) Router {
 	return &router{
 		container:              container,
 		mainController:         mainController,
 		authMiddleware:         authMiddleware,
 		errorHandlerMiddleware: errorHandlerMiddleware,
+		observerMiddleware:     observerMiddleware,
 	}
 }
 
@@ -54,6 +57,7 @@ func (r *router) SetupHandlers() error {
 	h.Use(gin.Logger())
 	h.Use(gin.Recovery())
 	h.Use(r.errorHandlerMiddleware.Error())
+	h.Use(r.observerMiddleware.Observer())
 	h.GET("/", r.Index)
 	h.GET("/articles", r.Index)
 	h.GET("/article/:id", r.Article)
@@ -89,6 +93,7 @@ func (r *router) registerValidators() error {
 func (r *router) registerTemplateFunction(e *gin.Engine) {
 	e.FuncMap = template.FuncMap{
 		"DateFormat": utils.DateFormat,
+		"Add":        utils.Add,
 	}
 }
 
@@ -263,5 +268,13 @@ func (r *router) NewCategoryPOST(ctx *gin.Context) {
 }
 
 func (r *router) DashboardActions(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "views/actions.tmpl", nil)
+	log := r.container.GetLogger()
+
+	actions, err := r.mainController.ViewActions()
+	if err != nil {
+		log.Error("view actions has failed", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	ctx.HTML(http.StatusOK, "views/actions.tmpl", actions)
 }

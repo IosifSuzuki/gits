@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS ip;
+DROP TABLE IF EXISTS observable;

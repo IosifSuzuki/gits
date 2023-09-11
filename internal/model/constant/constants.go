@@ -18,5 +18,7 @@ const (
 	CookieSessionKey = "session-key"
 	AccountAppKey    = "account-app-key"
 
+	UserAgentHeaderKey = "User-Agent"
+
 	S3BucketKey = "S3_BUCKET"
 )

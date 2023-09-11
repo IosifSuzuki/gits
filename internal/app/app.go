@@ -27,13 +27,15 @@ func Run() error {
 	sessionService := service.NewSession(box, cacheProvider)
 	decompressorFile := service.NewDecompressorFile(box)
 	md := service.NewMD(box)
+	ip := service.NewIp(box)
 	attachmentStorage, err := service.NewAttachmentStorage(box)
 	if err != nil {
 		return err
 	}
 	mainController := controller.NewMainController(box, storageService, sessionService, decompressorFile, attachmentStorage, md)
 	authMiddleware := middleware.NewAuth(box, sessionService)
+	observable := middleware.NewObserver(box, sessionService, ip, storageService)
 	errorHandlerMiddleware := middleware.NewErrorHandler(box)
-	r := router.NewRouter(box, mainController, authMiddleware, errorHandlerMiddleware)
+	r := router.NewRouter(box, mainController, authMiddleware, errorHandlerMiddleware, observable)
 	return r.SetupHandlers()
 }

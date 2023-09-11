@@ -15,8 +15,9 @@ const confPath = "configs/config.yml"
 type Config struct {
 	Server  Server `yaml:"server"`
 	Storage Storage
-	Cache   Cache `yaml:"cache"`
-	AWS     AWS   `yaml:"aws"`
+	Cache   Cache  `yaml:"cache"`
+	AWS     AWS    `yaml:"aws"`
+	IpInfo  IpInfo `yaml:"ip_info"`
 }
 
 type Server struct {
@@ -44,6 +45,10 @@ type Cache struct {
 type AWS struct {
 	S3Bucket string `yaml:"s3_bucket"`
 	S3Region string `yaml:"s3_region"`
+}
+
+type IpInfo struct {
+	Token string `yaml:"token"`
 }
 
 func NewConfig() (*Config, error) {
