@@ -7,6 +7,7 @@ import (
 	"gits/internal/container"
 	"gits/internal/model/app"
 	"gits/internal/model/constant"
+	"gits/internal/model/dto"
 	"gits/internal/service"
 	"go.uber.org/zap"
 )
@@ -39,24 +40,27 @@ func (o *observer) Observer() gin.HandlerFunc {
 		ctx.Next()
 
 		var (
-			account            *app.Account
+			account            *dto.Account
 			retrieveAccountErr error
 			geoLocation        *app.GeoLocation
 		)
 		accountValue, ok := ctx.Get(constant.AccountAppKey)
 		if ok {
-			account = accountValue.(*app.Account)
+			account = accountValue.(*dto.Account)
 		}
+
 		if account == nil {
 			account, retrieveAccountErr = retrieveAccount(ctx, sessionCtx, o.AccountSession)
 		}
 		if retrieveAccountErr != nil {
 			log.Error("retrieve account by session id has failed", zap.Error(retrieveAccountErr))
 		}
+
 		var accountId *int
 		if account != nil {
-			accountId = &account.Id
+			accountId = &account.ID
 		}
+
 		ip := ctx.ClientIP()
 		exists, err := o.storageService.ExistsIp(ip)
 		if err != nil {

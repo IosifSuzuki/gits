@@ -1,4 +1,4 @@
-package form
+package dto
 
 import "mime/multipart"
 

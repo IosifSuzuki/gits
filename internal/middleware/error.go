@@ -22,6 +22,7 @@ func NewErrorHandler(container container.Container) ErrorHandler {
 func (e *errorHandler) Error() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
+
 		httpCode := ctx.Writer.Status()
 		if httpCode < 200 || httpCode >= 300 {
 			ctx.HTML(httpCode, "views/error.tmpl", gin.H{

@@ -1,4 +1,4 @@
-package form
+package dto
 
 type Authentication struct {
 	Username string `form:"username" binding:"required,username"`

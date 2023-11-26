@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gits/internal/container"
-	"gits/internal/model/app"
+	"gits/internal/model/dto"
 	"gits/internal/model/errs"
 	"gits/internal/provider"
 	"go.uber.org/zap"
@@ -14,8 +14,8 @@ import (
 )
 
 type AccountSession interface {
-	CreateAccountSession(ctx context.Context, account *app.Account) (*app.AccountSession, error)
-	RetrieveAccountSession(ctx context.Context, accountSession *app.AccountSession) (*app.Account, error)
+	CreateAccountSession(ctx context.Context, account *dto.Account) (*dto.AccountSession, error)
+	RetrieveAccountSession(ctx context.Context, accountSession *dto.AccountSession) (*dto.Account, error)
 }
 
 type accountSession struct {
@@ -30,25 +30,31 @@ func NewSession(container container.Container, cache provider.Cache) AccountSess
 	}
 }
 
-func (s *accountSession) CreateAccountSession(ctx context.Context, account *app.Account) (*app.AccountSession, error) {
+func (s *accountSession) CreateAccountSession(ctx context.Context, account *dto.Account) (*dto.AccountSession, error) {
 	uuidKey := uuid.New()
 	conf := s.container.GetConfig()
 	ttl := conf.Cache.SessionTTL
 
+	log := s.container.GetLogger()
+
 	if err := s.SaveJSONData(ctx, account, uuidKey.String(), ttl); err != nil {
+		log.Error("fail to save json to service", zap.Error(err))
 		return nil, err
 	}
-	return &app.AccountSession{
+	return &dto.AccountSession{
 		SessionId: uuidKey.String(),
 	}, nil
 }
 
-func (s *accountSession) RetrieveAccountSession(ctx context.Context, accountSession *app.AccountSession) (*app.Account, error) {
+func (s *accountSession) RetrieveAccountSession(ctx context.Context, accountSession *dto.AccountSession) (*dto.Account, error) {
 	var (
-		account app.Account
+		account dto.Account
 		uuidKey = accountSession.SessionId
 	)
+	log := s.container.GetLogger()
+
 	if err := s.GetJSONData(ctx, uuidKey, &account); err != nil {
+		log.Error("fail to get json from service", zap.Error(err))
 		return nil, err
 	}
 	return &account, nil

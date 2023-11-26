@@ -1,5 +1,5 @@
-package form
+package dto
 
-type NewCategory struct {
+type FormCategory struct {
 	Title *string `form:"title" binding:"required"`
 }

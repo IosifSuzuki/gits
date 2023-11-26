@@ -5,18 +5,11 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"gits/internal/container"
-	"gits/internal/controller"
+	"gits/internal/controller/central"
 	"gits/internal/middleware"
-	"gits/internal/model/app"
-	"gits/internal/model/constant"
-	"gits/internal/model/form"
-	"gits/internal/model/request"
 	"gits/internal/utils"
 	valid "gits/internal/validator"
-	"go.uber.org/zap"
 	"html/template"
-	"net/http"
-	"time"
 )
 
 type Router interface {
@@ -26,7 +19,7 @@ type Router interface {
 
 type router struct {
 	container              container.Container
-	mainController         controller.MainController
+	mainController         central.MainController
 	authMiddleware         middleware.Auth
 	errorHandlerMiddleware middleware.ErrorHandler
 	observerMiddleware     middleware.Observer
@@ -34,7 +27,7 @@ type router struct {
 
 func NewRouter(
 	container container.Container,
-	mainController controller.MainController,
+	mainController central.MainController,
 	authMiddleware middleware.Auth,
 	errorHandlerMiddleware middleware.ErrorHandler,
 	observerMiddleware middleware.Observer,
@@ -95,186 +88,4 @@ func (r *router) registerTemplateFunction(e *gin.Engine) {
 		"DateFormat": utils.DateFormat,
 		"Add":        utils.Add,
 	}
-}
-
-func (r *router) Index(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	htmlArticles, err := r.mainController.Articles()
-	if err != nil {
-		log.Error("fetch articles has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.HTML(http.StatusOK, "views/index.tmpl", gin.H{
-		"now":      time.Now(),
-		"articles": htmlArticles,
-	})
-}
-
-func (r *router) Article(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	var articleRequest request.Article
-	if err := ctx.ShouldBindUri(&articleRequest); err != nil {
-		log.Error("bind uri has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	htmlArticle, err := r.mainController.Article(&articleRequest)
-	if err != nil {
-		log.Error("article by id has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.HTML(http.StatusOK, "views/article.tmpl", gin.H{
-		"now":     time.Now(),
-		"article": htmlArticle,
-	})
-}
-
-func (r *router) Authentication(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "views/auth.tmpl", gin.H{
-		"now": time.Now(),
-	})
-}
-
-func (r *router) AuthenticationPOST(ctx *gin.Context) {
-	log := r.container.GetLogger()
-	conf := r.container.GetConfig()
-
-	cookieTTL := int(conf.Cache.SessionTTL / time.Second)
-	log.Debug("ttl cookie for session in second", zap.Int("ttl in second", cookieTTL))
-
-	var authenticationForm form.Authentication
-	if err := ctx.Bind(&authenticationForm); err != nil {
-		log.Error("bind form has failed", zap.Error(err))
-		return
-	}
-	authSessionResponse, err := r.mainController.Auth(&authenticationForm)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	ctx.SetCookie(constant.CookieSessionKey, authSessionResponse.SessionId, cookieTTL, "/", "", false, false)
-	ctx.Redirect(http.StatusSeeOther, "admin/new/article")
-}
-
-func (r *router) NewArticle(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	accountValue, ok := ctx.Get(constant.AccountAppKey)
-	if !ok {
-		log.Error("can't retrieve account model from context")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	account, ok := accountValue.(*app.Account)
-	if !ok {
-		log.Error("can't cast to account model from context value")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	newArticle, err := r.mainController.NewArticle(account)
-	if err != nil {
-		log.Error("NewArticle has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	log.Debug("account has gain access to create new post", zap.Int("accountId", account.Id))
-	ctx.HTML(http.StatusOK, "views/newArticle.tmpl", newArticle)
-}
-
-func (r *router) NewArticlePOST(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	accountValue, ok := ctx.Get(constant.AccountAppKey)
-	if !ok {
-		log.Error("can't retrieve account model from context")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	account, ok := accountValue.(*app.Account)
-	if !ok {
-		log.Error("can't cast to account model from context value")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	var newArticleForm form.NewArticle
-	if err := ctx.Bind(&newArticleForm); err != nil {
-		log.Error("bind form has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	if err := r.mainController.PostNewArticle(account, &newArticleForm); err != nil {
-		log.Error("post new article has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Redirect(http.StatusSeeOther, "/articles")
-}
-
-func (r *router) NewCategory(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	accountValue, ok := ctx.Get(constant.AccountAppKey)
-	if !ok {
-		log.Error("can't retrieve account model from context")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	account, ok := accountValue.(*app.Account)
-	if !ok {
-		log.Error("can't cast to account model from context value")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
-	newCategory, err := r.mainController.NewCategory(account)
-	if err != nil {
-		log.Error("new category operation has failed", zap.Error(err))
-	}
-	ctx.HTML(http.StatusOK, "views/newCategory.tmpl", newCategory)
-}
-
-func (r *router) NewCategoryPOST(ctx *gin.Context) {
-	log := r.container.GetLogger()
-	accountValue, ok := ctx.Get(constant.AccountAppKey)
-	if !ok {
-		log.Error("can't retrieve account model from context")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	account, ok := accountValue.(*app.Account)
-	if !ok {
-		log.Error("can't cast to account model from context value")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-	}
-	var newCategory form.NewCategory
-	if err := ctx.Bind(&newCategory); err != nil {
-		log.Error("bind form has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	if err := r.mainController.CreateNewCategory(account, &newCategory); err != nil {
-		log.Error("create new category has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Redirect(http.StatusSeeOther, "/admin/new/category")
-}
-
-func (r *router) DashboardActions(ctx *gin.Context) {
-	log := r.container.GetLogger()
-
-	actions, err := r.mainController.ViewActions()
-	if err != nil {
-		log.Error("view actions has failed", zap.Error(err))
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.HTML(http.StatusOK, "views/actions.tmpl", actions)
 }
