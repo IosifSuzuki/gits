@@ -2,18 +2,19 @@ package html
 
 import (
 	"fmt"
+	"gits/internal/model/dto"
 	"html/template"
 	"time"
 )
 
 type Article struct {
-	Author      *Author
+	Author      *dto.Account
 	Title       *string
 	Location    *string
 	Date        *time.Time
 	ReadingTime int
 	Content     template.HTML
-	Categories  []Category
+	Categories  []dto.Category
 }
 
 func (a *Article) ReadingTimeText() string {

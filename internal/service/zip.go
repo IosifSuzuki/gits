@@ -3,7 +3,7 @@ package service
 import (
 	"archive/zip"
 	"gits/internal/container"
-	"gits/internal/model/app"
+	"gits/internal/model/dto"
 	"gits/internal/model/errs"
 	"go.uber.org/zap"
 	"io"
@@ -12,7 +12,7 @@ import (
 )
 
 type DecompressorFile interface {
-	ExtractZip(request *app.ArticleUploadRequest) (*app.ArticleFiles, error)
+	ExtractZip(request *dto.ArticleUploadRequest) (*dto.ArticleFiles, error)
 }
 
 type decompressorFile struct {
@@ -25,7 +25,7 @@ func NewDecompressorFile(container container.Container) DecompressorFile {
 	}
 }
 
-func (d *decompressorFile) ExtractZip(request *app.ArticleUploadRequest) (*app.ArticleFiles, error) {
+func (d *decompressorFile) ExtractZip(request *dto.ArticleUploadRequest) (*dto.ArticleFiles, error) {
 	log := d.container.GetLogger()
 
 	zipReader, err := zip.NewReader(request.ReaderAt, request.Size)
@@ -59,5 +59,5 @@ func (d *decompressorFile) ExtractZip(request *app.ArticleUploadRequest) (*app.A
 			attachmentFiles[fileName] = f
 		}
 	}
-	return app.NewArticleFiles(mdFile, attachmentFiles), nil
+	return dto.NewArticleFiles(mdFile, attachmentFiles), nil
 }
