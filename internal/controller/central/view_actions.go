@@ -5,24 +5,24 @@ import (
 	"go.uber.org/zap"
 )
 
-// TODO refactor code
-
 func (m *mainController) ViewActions() ([]html.Action, error) {
 	log := m.GetLogger()
 
-	observables, err := m.RetrieveObservables()
+	storObservables, err := m.storageDAO.GetObservableRepository().RetrieveObservables()
 	if err != nil {
 		log.Error("retrieve observables has failed", zap.Error(err))
 		return nil, err
 	}
-	actions := make([]html.Action, 0, len(observables))
-	for _, observable := range observables {
-		action, err := html.NewAction(observable)
+
+	actions := make([]html.Action, 0, len(storObservables))
+	for _, storObservable := range storObservables {
+		action, err := html.NewAction(&storObservable)
 		if err != nil {
 			log.Error("create new action has failed", zap.Error(err))
 		} else if action != nil {
 			actions = append(actions, *action)
 		}
 	}
+
 	return actions, err
 }

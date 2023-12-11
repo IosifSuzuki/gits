@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"gits/internal/container"
-	"gits/internal/model/app"
-	"gits/internal/model/service/response"
+	"gits/internal/model/dto"
 	"go.uber.org/zap"
 	"net/http"
 )
 
 type Ip interface {
-	GeoLocation(ip string) (*app.GeoLocation, error)
+	GeoLocation(ip string) (*dto.GeoLocation, error)
 }
 
 type ip struct {
@@ -24,7 +23,7 @@ func NewIp(container container.Container) Ip {
 	}
 }
 
-func (i *ip) GeoLocation(ip string) (*app.GeoLocation, error) {
+func (i *ip) GeoLocation(ip string) (*dto.GeoLocation, error) {
 	log := i.GetLogger()
 	conf := i.GetConfig()
 
@@ -34,21 +33,11 @@ func (i *ip) GeoLocation(ip string) (*app.GeoLocation, error) {
 		log.Error("make request to retrieve info about ip has failed", zap.Error(err))
 		return nil, err
 	}
-	var geoLocation response.GeoLocation
+	var geoLocation dto.GeoLocation
 	if err := json.NewDecoder(resp.Body).Decode(&geoLocation); err != nil {
 		log.Error("geo location model has failed map to struct", zap.Error(err))
 		return nil, err
 	}
 
-	return &app.GeoLocation{
-		Ip:       geoLocation.Ip,
-		Hostname: geoLocation.Hostname,
-		City:     geoLocation.City,
-		Region:   geoLocation.Region,
-		Country:  geoLocation.Country,
-		Loc:      geoLocation.Loc,
-		Org:      geoLocation.Org,
-		Postal:   geoLocation.Postal,
-		Timezone: geoLocation.Timezone,
-	}, nil
+	return &geoLocation, err
 }

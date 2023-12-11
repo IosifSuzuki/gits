@@ -5,10 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mileusna/useragent"
 	"gits/internal/container"
-	"gits/internal/model/app"
 	"gits/internal/model/constant"
 	"gits/internal/model/dto"
+	stor "gits/internal/model/storage"
 	"gits/internal/service"
+	"gits/internal/service/storage"
 	"go.uber.org/zap"
 )
 
@@ -19,16 +20,16 @@ type Observer interface {
 type observer struct {
 	container.Container
 	AccountSession service.AccountSession
-	IpService      service.Ip
-	storageService service.Storage
+	IPService      service.Ip
+	dao            storage.DAO
 }
 
-func NewObserver(container container.Container, accountSession service.AccountSession, Ip service.Ip, storageService service.Storage) Observer {
+func NewObserver(container container.Container, accountSession service.AccountSession, Ip service.Ip, dao storage.DAO) Observer {
 	return &observer{
 		container,
 		accountSession,
 		Ip,
-		storageService,
+		dao,
 	}
 }
 
@@ -40,9 +41,8 @@ func (o *observer) Observer() gin.HandlerFunc {
 		ctx.Next()
 
 		var (
-			account            *dto.Account
-			retrieveAccountErr error
-			geoLocation        *app.GeoLocation
+			account          *dto.Account
+			obtainAccountErr error
 		)
 		accountValue, ok := ctx.Get(constant.AccountAppKey)
 		if ok {
@@ -50,10 +50,10 @@ func (o *observer) Observer() gin.HandlerFunc {
 		}
 
 		if account == nil {
-			account, retrieveAccountErr = retrieveAccount(ctx, sessionCtx, o.AccountSession)
+			account, obtainAccountErr = retrieveAccount(ctx, sessionCtx, o.AccountSession)
 		}
-		if retrieveAccountErr != nil {
-			log.Error("retrieve account by session id has failed", zap.Error(retrieveAccountErr))
+		if obtainAccountErr != nil {
+			log.Error("retrieve account by session id has failed", zap.Error(obtainAccountErr))
 		}
 
 		var accountId *int
@@ -62,52 +62,89 @@ func (o *observer) Observer() gin.HandlerFunc {
 		}
 
 		ip := ctx.ClientIP()
-		exists, err := o.storageService.ExistsIp(ip)
+		storIP, err := o.ObtainStorageIp(ip)
 		if err != nil {
-			log.Error("exist ip operation has failed", zap.Error(err))
+			log.Error("obtain storage ip has failed", zap.Error(err))
 		}
-		if exists {
-			geoLocation = &app.GeoLocation{
-				Ip: &ip,
-			}
-		} else {
-			geoLocation, err = o.IpService.GeoLocation(ip)
-		}
-		if err != nil {
-			log.Error("retrieve geo location has failed", zap.Error(err))
-			return
-		}
+
 		ua := ctx.GetHeader(constant.UserAgentHeaderKey)
 		userAgentModel := useragent.Parse(ua)
 
-		ipAppModel := app.Ip{
-			ID:       nil,
-			Ip:       &ip,
-			Hostname: geoLocation.Hostname,
-			City:     geoLocation.City,
-			Region:   geoLocation.Region,
-			Country:  geoLocation.Country,
-			Loc:      geoLocation.Loc,
-			Org:      geoLocation.Org,
-			Postal:   geoLocation.Postal,
-			Timezone: geoLocation.Timezone,
-		}
-		observable := app.Observable{
+		storObservable := stor.Observable{
 			AccountId: accountId,
-			Ip:        &ipAppModel,
+			IpId:      storIP.ID,
+			Ip:        storIP,
 			Browser:   &userAgentModel.Name,
 			OS:        &userAgentModel.OS,
 			OSVersion: &userAgentModel.OSVersion,
 			Path:      &ctx.Request.URL.Path,
 			Device:    &userAgentModel.Device,
 		}
-		ok, err = o.storageService.CreateNewObservable(&observable)
-		if err != nil {
+
+		if err := o.dao.GetObservableRepository().CreateNewObservable(&storObservable); err != nil {
 			log.Error("create new observable has failed", zap.Error(err))
-			return
-		} else if !ok {
-			log.Error("unsuccessfully create new observable")
-			return
 		}
 	}
+}
+
+func (o *observer) ObtainStorageIp(ip string) (*stor.Ip, error) {
+	log := o.GetLogger()
+	var (
+		storIP *stor.Ip
+		err    error
+	)
+
+	existsIP, err := o.dao.GetObservableRepository().ExistsIp(ip)
+	if existsIP {
+		storIP, err = o.GetStorageIp(ip)
+	} else {
+		storIP, err = o.GetStorageIp(ip)
+	}
+
+	if err != nil {
+		log.Error("obtain storage ip has failed", zap.Error(err))
+		return nil, err
+	}
+
+	return storIP, nil
+}
+
+func (o *observer) GetStorageIp(ip string) (*stor.Ip, error) {
+	log := o.GetLogger()
+
+	storIP, err := o.dao.GetObservableRepository().RetrieveIp(ip)
+	if err != nil {
+		log.Error("fail to get ip from db", zap.Error(err))
+	}
+
+	return storIP, err
+}
+
+func (o *observer) SaveStorageIp(ip string) (*stor.Ip, error) {
+	log := o.GetLogger()
+
+	geoLocation, err := o.IPService.GeoLocation(ip)
+	if err != nil {
+		log.Error("get geolocation has failed", zap.Error(err))
+		return nil, err
+	}
+
+	storIP := stor.Ip{
+		Ip:       geoLocation.Ip,
+		Hostname: geoLocation.Hostname,
+		City:     geoLocation.City,
+		Region:   geoLocation.Region,
+		Country:  geoLocation.Country,
+		Loc:      geoLocation.Loc,
+		Org:      geoLocation.Org,
+		Postal:   geoLocation.Postal,
+		Timezone: geoLocation.Timezone,
+	}
+	_, err = o.dao.GetObservableRepository().CreateNewIp(&storIP)
+	if err != nil {
+		log.Error("fail to create new ip model in db", zap.Error(err))
+		return nil, err
+	}
+
+	return &storIP, nil
 }

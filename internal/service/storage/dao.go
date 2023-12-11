@@ -8,6 +8,7 @@ import (
 type DAO interface {
 	GetAccountRepository() AccountRepository
 	GetArticleRepository() ArticleRepository
+	GetObservableRepository() ObservableRepository
 }
 
 type dao struct {
@@ -28,4 +29,8 @@ func (d *dao) GetAccountRepository() AccountRepository {
 
 func (d *dao) GetArticleRepository() ArticleRepository {
 	return NewArticleRepository(d.container, d.storageProvider)
+}
+
+func (d *dao) GetObservableRepository() ObservableRepository {
+	return NewObservableRepository(d.container, d.storageProvider)
 }

@@ -1,4 +1,4 @@
-package response
+package dto
 
 type GeoLocation struct {
 	Ip       *string `json:"ip"`

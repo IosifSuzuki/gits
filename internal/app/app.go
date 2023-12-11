@@ -25,7 +25,6 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	storageService := service.NewStorage(box, storageProvider)
 
 	storageDAO := storage.NewDAO(box, storageProvider)
 	cacheProvider := provider.NewCache(box)
@@ -44,12 +43,12 @@ func Run() error {
 	}
 
 	mainController := central.NewMainController(
-		box, storageService, sessionService, decompressorFile, attachmentStorage, md, storageDAO,
+		box, sessionService, decompressorFile, attachmentStorage, md, storageDAO,
 	)
 
 	authMiddleware := middleware.NewAuth(box, sessionService)
 
-	observable := middleware.NewObserver(box, sessionService, ip, storageService)
+	observable := middleware.NewObserver(box, sessionService, ip, storageDAO)
 
 	errorHandlerMiddleware := middleware.NewErrorHandler(box)
 

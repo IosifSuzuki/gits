@@ -3,7 +3,7 @@ package html
 import (
 	"fmt"
 	"gits/internal/helper"
-	"gits/internal/model/app"
+	stor "gits/internal/model/storage"
 	"strings"
 	"time"
 )
@@ -18,50 +18,63 @@ type Action struct {
 	UpdatedAt *time.Time
 }
 
-func NewAction(observable app.Observable) (*Action, error) {
-	var (
-		location *string
-		user     *string
-		browser  *string
-	)
-	if ip := observable.Ip; ip != nil {
-		if ip.Country != nil && ip.Region != nil && ip.City != nil {
-			location = helper.String(fmt.Sprintf("%s %s", *ip.Region, *ip.City))
-		} else {
-			location = helper.String("unknown")
-		}
-	} else {
-		location = helper.String("unknown")
-	}
-	if account := observable.Account; account != nil {
-		user = helper.String(account.Username)
-	} else {
-		user = helper.String("anonymous")
-	}
-	var (
-		countryIso2Code *string
-		flagUrl         *string
-	)
-	if country := observable.Ip.Country; country != nil {
-		countryIso2Code = helper.String(strings.ToLower(*country))
-	}
-	if countryIso2Code != nil {
-		flagUrl = helper.String(fmt.Sprintf("https://www.kidlink.org//icons/f0-%s.gif", *countryIso2Code))
-	} else {
-		flagUrl = helper.String("https://www.kidlink.org//icons/e.gif")
-	}
-	if observable.Browser != nil && observable.OS != nil && observable.OSVersion != nil {
-		browser = helper.String(
-			fmt.Sprintf("os: %s %s; browser: %s", *observable.OS, *observable.OSVersion, *observable.Browser),
-		)
-	}
+func NewAction(observable *stor.Observable) (*Action, error) {
 	return &Action{
 		IP:        observable.Ip.Ip,
-		Location:  location,
+		Location:  getLocation(observable),
 		Path:      observable.Path,
-		Browser:   browser,
-		User:      user,
-		Flag:      flagUrl,
-		UpdatedAt: observable.UpdatedAt,
+		Browser:   getHardwareInfo(observable),
+		User:      getUsername(observable),
+		Flag:      getFlagURL(observable),
+		UpdatedAt: &observable.UpdatedAt,
 	}, nil
+}
+
+func getLocation(observable *stor.Observable) *string {
+	var location string
+	if ip := observable.Ip; ip.Country != nil && ip.Region != nil && ip.City != nil {
+		location = fmt.Sprintf("%s %s", *ip.Region, *ip.City)
+	} else {
+		location = "unknown"
+	}
+
+	return &location
+}
+
+func getUsername(observable *stor.Observable) *string {
+	var user string
+	if account := observable.Account; account != nil {
+		user = account.Username
+	} else {
+		user = "anonymous"
+	}
+
+	return &user
+}
+
+func getFlagURL(observable *stor.Observable) *string {
+	var flagURL *string
+
+	country := observable.Ip.Country
+	if country == nil {
+		flagURL = helper.String("https://www.kidlink.org//icons/e.gif")
+	} else {
+		countryIso2Code := helper.String(strings.ToLower(*country))
+		flagURL = helper.String(fmt.Sprintf("https://www.kidlink.org//icons/f0-%s.gif", *countryIso2Code))
+	}
+
+	return flagURL
+}
+
+func getHardwareInfo(observable *stor.Observable) *string {
+	var browser *string
+
+	if observable.Browser != nil && observable.OS != nil && observable.OSVersion != nil {
+		hardwareInfo := fmt.Sprintf("os: %s %s; browser: %s", *observable.OS, *observable.OSVersion, *observable.Browser)
+		browser = &hardwareInfo
+	} else {
+		browser = nil
+	}
+
+	return browser
 }

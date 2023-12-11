@@ -10,7 +10,6 @@ import (
 
 type mainController struct {
 	container.Container
-	service.Storage
 	service.AccountSession
 	service.DecompressorFile
 	service.AttachmentStorage
@@ -31,7 +30,6 @@ type MainController interface {
 
 func NewMainController(
 	container container.Container,
-	storage service.Storage,
 	session service.AccountSession,
 	decompressorFile service.DecompressorFile,
 	attachmentStorage service.AttachmentStorage,
@@ -40,7 +38,6 @@ func NewMainController(
 ) MainController {
 	return &mainController{
 		Container:         container,
-		Storage:           storage,
 		AccountSession:    session,
 		DecompressorFile:  decompressorFile,
 		AttachmentStorage: attachmentStorage,
