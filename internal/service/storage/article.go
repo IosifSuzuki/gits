@@ -58,7 +58,7 @@ func (a *articleRepository) Article(id int) (*stor.Article, error) {
 	log := a.container.GetLogger()
 
 	var article stor.Article
-	if err := conn.Preload("Categories").First(&article, id).Error; err != nil {
+	if err := conn.Preload("Categories").Preload("Attachments").First(&article, id).Error; err != nil {
 		log.Error("can't retrieve article by id", zap.Int("article id", id))
 		return nil, err
 	}

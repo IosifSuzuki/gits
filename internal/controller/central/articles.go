@@ -19,8 +19,16 @@ func (m *mainController) Articles() ([]*html.PreviewArticle, error) {
 
 	previewArticles := make([]*html.PreviewArticle, 0, len(storArticles))
 	for _, storArticle := range storArticles {
-		stripHtmlContent := strip.StripTags(*storArticle.Content)
+		htmlContent, err := m.convertMdToHtmlContent(&storArticle)
+		if err != nil {
+			log.Error("convert mark down to html has failed", zap.Error(err))
+
+			return nil, err
+		}
+
+		stripHtmlContent := strip.StripTags(*htmlContent)
 		content := utils.PrefixString(stripHtmlContent, 70)
+
 		contentHTML := template.HTML(content)
 		date := storArticle.UpdatedAt
 		previewArticles = append(previewArticles, &html.PreviewArticle{

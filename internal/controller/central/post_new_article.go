@@ -1,6 +1,7 @@
 package central
 
 import (
+	"encoding/base64"
 	"github.com/google/uuid"
 	"gits/internal/model/dto"
 	"gits/internal/model/errs"
@@ -61,19 +62,15 @@ func (m *mainController) PostNewArticle(account *dto.Account, form *dto.NewArtic
 		return err
 	}
 
-	transformedMDData, err := m.MD.RenderMdToHTML(mdFileData, newAttachmentIdentifiers)
-	if err != nil {
-		log.Error("transform md to new view has failed", zap.Error(err))
-		return err
-	}
-
-	transformedMString := string(transformedMDData)
+	base64MDContent := base64.StdEncoding.EncodeToString(mdFileData)
 
 	storAttachments := make([]storage.Attachment, 0, len(articleFiles.Attachments))
-	for _, attachmentIdentifier := range newAttachmentIdentifiers {
+	for reference, attachmentIdentifier := range newAttachmentIdentifiers {
 		var pathAttachment = attachmentIdentifier
+		var reference = reference
 		storAttachment := storage.Attachment{
-			Path: &pathAttachment,
+			Path:      &pathAttachment,
+			Reference: &reference,
 		}
 
 		storAttachments = append(storAttachments, storAttachment)
@@ -90,7 +87,7 @@ func (m *mainController) PostNewArticle(account *dto.Account, form *dto.NewArtic
 		Title:       form.Title,
 		ReadingTime: form.ReadingTime,
 		Location:    form.Location,
-		Content:     &transformedMString,
+		Content:     &base64MDContent,
 		Categories:  selectedCategories,
 		Attachments: storAttachments,
 	}
