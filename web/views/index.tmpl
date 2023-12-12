@@ -9,11 +9,12 @@
     <main class="my-page-content">
         <div class="container">
             <ul class="my-post-list">
-                {{ range .articles }}
+                {{ range .content.Articles }}
                     {{ template "layouts/postItem.tmpl" .}}
                 {{ end }}
             </ul>
         </div>
+        {{ template "layouts/pagination.tmpl" .content.Pagination}}
     </main>
     {{ template "layouts/footer.tmpl" . }}
     {{ template "layouts/scripts.tmpl" .}}

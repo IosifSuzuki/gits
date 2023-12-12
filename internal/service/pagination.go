@@ -20,13 +20,13 @@ func NewPagination(page uint, batchSize uint, countItems uint) Pagination {
 }
 
 func (p *Pagination) Build(
+	paginationPreviousItemFunc func() *html.PaginationItem,
 	paginationItemFunc func(idx uint) *html.PaginationItem,
 	paginationNextItemFunc func() *html.PaginationItem,
-	paginationPreviousItemFunc func() *html.PaginationItem,
 ) *html.Pagination {
 	const VisiblePagesPerSide uint = 2
 
-	availablePages := 1 + p.countItems/p.batchSize
+	availablePages := p.countItems / p.batchSize
 	if p.countItems%p.batchSize > 0 {
 		availablePages += 1
 	}
@@ -35,7 +35,7 @@ func (p *Pagination) Build(
 	beginPageIndex := uint(utils.Max(int(p.page)-int(VisiblePagesPerSide), 1))
 	endPageIndex := utils.Min(p.page+VisiblePagesPerSide+1, availablePages)
 
-	for i := beginPageIndex; i < endPageIndex; i++ {
+	for i := beginPageIndex; i <= endPageIndex; i++ {
 		if paginationItem := paginationItemFunc(i); paginationItem != nil {
 			paginationItems = append(paginationItems, *paginationItem)
 		}
@@ -48,6 +48,8 @@ func (p *Pagination) Build(
 	previousPaginationItem.Active = p.page > 1
 
 	return &html.Pagination{
+		Page:         int(p.page),
+		Batch:        int(p.batchSize),
 		NextItem:     nextPaginationItem,
 		Items:        paginationItems,
 		PreviousItem: previousPaginationItem,

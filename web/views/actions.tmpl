@@ -24,9 +24,11 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{ $page := .Pagination.Page }}
+                        {{ $batch := .Pagination.Batch }}
                         {{ range $idx, $item := .Actions }}
                             <tr>
-                                <th scope="row">{{ 1 | Add $idx }}</th>
+                                <th scope="row">{{ $page | Add -1  | Mul $batch | Add 1 | Add $idx }}</th>
                                 <td>{{ $item.IP }}</td>
                                 <td><img src="{{ $item.Flag }}" alt="flag"></td>
                                 <td>{{ $item.Location }}</td>

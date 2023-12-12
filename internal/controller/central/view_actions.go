@@ -9,12 +9,12 @@ import (
 	"html/template"
 )
 
-const BatchSize uint = 20
-
 func (m *mainController) ViewActions(page *dto.Page) (*html.Actions, error) {
+	const BatchSize uint = 20
+
 	log := m.GetLogger()
 
-	pagination, err := m.prepareActionsPagination(page)
+	pagination, err := m.prepareActionsPagination(page, BatchSize)
 	if err != nil {
 		log.Error("fail to prepare pagination for action", zap.Error(err))
 		return nil, err
@@ -42,7 +42,7 @@ func (m *mainController) ViewActions(page *dto.Page) (*html.Actions, error) {
 	}, err
 }
 
-func (m *mainController) prepareActionsPagination(page *dto.Page) (*html.Pagination, error) {
+func (m *mainController) prepareActionsPagination(page *dto.Page, batchSize uint) (*html.Pagination, error) {
 	log := m.GetLogger()
 
 	countObservables, err := m.storageDAO.GetObservableRepository().LenObservables()
@@ -51,7 +51,7 @@ func (m *mainController) prepareActionsPagination(page *dto.Page) (*html.Paginat
 		return nil, err
 	}
 
-	paginationBuilder := service.NewPagination(page.Page, BatchSize, countObservables)
+	paginationBuilder := service.NewPagination(page.Page, batchSize, countObservables)
 
 	paginationItemBuilderFunc := func(idx uint) *html.PaginationItem {
 		path := fmt.Sprintf("/admin/actions/%d", idx)
@@ -72,9 +72,9 @@ func (m *mainController) prepareActionsPagination(page *dto.Page) (*html.Paginat
 	}
 
 	pagination := paginationBuilder.Build(
+		paginationItemPreviousBuilderFunc,
 		paginationItemBuilderFunc,
 		paginationItemNextBuilderFunc,
-		paginationItemPreviousBuilderFunc,
 	)
 
 	return pagination, nil

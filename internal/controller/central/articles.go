@@ -1,23 +1,34 @@
 package central
 
 import (
+	"fmt"
 	strip "github.com/grokify/html-strip-tags-go"
+	"gits/internal/model/dto"
 	"gits/internal/model/html"
+	"gits/internal/service"
 	"gits/internal/utils"
 	"go.uber.org/zap"
 	"html/template"
 )
 
-func (m *mainController) Articles() ([]*html.PreviewArticle, error) {
+func (m *mainController) Articles(page *dto.Page) (*html.Articles, error) {
+	const BatchSize uint = 10
+
 	log := m.GetLogger()
 
-	storArticles, err := m.storageDAO.GetArticleRepository().RetrieveArticles()
+	pagination, err := m.prepareArticlesPagination(page, BatchSize)
 	if err != nil {
-		log.Error("retrieve articles from storage has failed", zap.Error(err))
+		log.Error("fail to prepare pagination for articles", zap.Error(err))
 		return nil, err
 	}
 
-	previewArticles := make([]*html.PreviewArticle, 0, len(storArticles))
+	storArticles, err := m.storageDAO.GetArticleRepository().Articles(int(page.Page), int(BatchSize))
+	if err != nil {
+		log.Error("retrieve articles from storage by pagination has failed", zap.Error(err))
+		return nil, err
+	}
+
+	previewArticles := make([]html.PreviewArticle, 0, len(storArticles))
 	for _, storArticle := range storArticles {
 		htmlContent, err := m.convertMdToHtmlContent(&storArticle)
 		if err != nil {
@@ -31,12 +42,54 @@ func (m *mainController) Articles() ([]*html.PreviewArticle, error) {
 
 		contentHTML := template.HTML(content)
 		date := storArticle.UpdatedAt
-		previewArticles = append(previewArticles, &html.PreviewArticle{
+		previewArticles = append(previewArticles, html.PreviewArticle{
 			Id:      int(storArticle.ID),
 			Title:   storArticle.Title,
 			Date:    &date,
 			Content: &contentHTML,
 		})
 	}
-	return previewArticles, nil
+
+	return &html.Articles{
+		Articles:   previewArticles,
+		Pagination: pagination,
+	}, nil
+}
+
+func (m *mainController) prepareArticlesPagination(page *dto.Page, batchSize uint) (*html.Pagination, error) {
+	log := m.GetLogger()
+
+	countArticles, err := m.storageDAO.GetArticleRepository().LenArticles()
+	if err != nil {
+		log.Error("obtain count of articles has failed", zap.Error(err))
+		return nil, err
+	}
+
+	paginationBuilder := service.NewPagination(page.Page, batchSize, countArticles)
+
+	paginationItemPreviousBuilderFunc := func() *html.PaginationItem {
+		path := fmt.Sprintf("/articles/%d", page.Page-1)
+		title := template.HTML("&laquo")
+		return html.NewPaginationItem(path, title, false)
+	}
+	paginationItemBuilderFunc := func(idx uint) *html.PaginationItem {
+		path := fmt.Sprintf("/articles/%d", idx)
+		title := template.HTML(fmt.Sprintf("%d", idx))
+		isActive := idx == page.Page
+
+		return html.NewPaginationItem(path, title, isActive)
+	}
+	paginationItemNextBuilderFunc := func() *html.PaginationItem {
+		path := fmt.Sprintf("/articles/%d", page.Page+1)
+		title := template.HTML("&raquo")
+		return html.NewPaginationItem(path, title, false)
+	}
+
+	pagination := paginationBuilder.Build(
+		paginationItemPreviousBuilderFunc,
+		paginationItemBuilderFunc,
+		paginationItemNextBuilderFunc,
+	)
+
+	return pagination, nil
 }

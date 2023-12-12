@@ -39,6 +39,10 @@ func Add(lsh, rhs int) int {
 	return lsh + rhs
 }
 
+func Mul(lhs, rhs int) int {
+	return lhs * rhs
+}
+
 func PrefixString(text string, words int) string {
 	parts := strings.Split(text, " ")
 	var actualWords int

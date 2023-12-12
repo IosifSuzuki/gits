@@ -22,7 +22,7 @@ type MainController interface {
 	NewArticle(account *dto.Account) (*html.NewArticle, error)
 	PostNewArticle(account *dto.Account, form *dto.NewArticle) error
 	Article(articleIdentifier *dto.ArticleIdentifier) (*html.Article, error)
-	Articles() ([]*html.PreviewArticle, error)
+	Articles(page *dto.Page) (*html.Articles, error)
 	NewCategory(account *dto.Account) (*html.NewCategory, error)
 	CreateNewCategory(account *dto.Account, form *dto.FormCategory) error
 	ViewActions(page *dto.Page) (*html.Actions, error)
