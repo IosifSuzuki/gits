@@ -8,10 +8,11 @@ import (
 )
 
 type ArticleRepository interface {
-	AvailableCategories() ([]stor.Category, error)
 	CreateNewArticle(article *stor.Article) error
 	Article(id int) (*stor.Article, error)
-	RetrieveArticles() ([]stor.Article, error)
+	Articles(page int, batch int) ([]stor.Article, error)
+	LenArticles() (uint, error)
+	AvailableCategories() ([]stor.Category, error)
 	CreateNewCategory(category *stor.Category) error
 	Categories(ids []int) ([]stor.Category, error)
 }
@@ -66,18 +67,6 @@ func (a *articleRepository) Article(id int) (*stor.Article, error) {
 	return &article, nil
 }
 
-func (a *articleRepository) RetrieveArticles() ([]stor.Article, error) {
-	conn := a.storageProvider.GetConnection()
-	log := a.container.GetLogger()
-
-	articles := make([]stor.Article, 0)
-	if err := conn.Find(&articles).Error; err != nil {
-		log.Error("find articles has failed", zap.Error(err))
-		return nil, err
-	}
-	return articles, nil
-}
-
 func (a *articleRepository) CreateNewCategory(category *stor.Category) error {
 	conn := a.storageProvider.GetConnection()
 	log := a.container.GetLogger()
@@ -99,4 +88,31 @@ func (a *articleRepository) Categories(ids []int) ([]stor.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (a *articleRepository) LenArticles() (uint, error) {
+	conn := a.storageProvider.GetConnection()
+	log := a.container.GetLogger()
+
+	var rows uint
+	if err := conn.Model(stor.Article{}).Select("count(*)").Find(&rows).Error; err != nil {
+		log.Error("retrieve articles has failed", zap.Error(err))
+		return 0, err
+	}
+
+	return rows, nil
+}
+
+func (a *articleRepository) Articles(page int, batch int) ([]stor.Article, error) {
+	log := a.container.GetLogger()
+	conn := a.storageProvider.GetConnection()
+
+	var articles []stor.Article
+	query := conn
+	if err := query.Scopes(Pagination(page, batch)).Find(&articles).Error; err != nil {
+		log.Error("observables with pagination has failed", zap.Error(err))
+		return nil, err
+	}
+
+	return articles, nil
 }

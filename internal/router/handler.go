@@ -53,6 +53,7 @@ func (r *router) SetupHandlers() error {
 	h.Use(r.observerMiddleware.Observer())
 	h.GET("/", r.Index)
 	h.GET("/articles/", r.Index)
+	h.GET("/articles/:page", r.Index)
 	h.GET("/article/:id", r.Article)
 	h.GET("/auth", r.Authentication)
 	h.POST("/auth", r.AuthenticationPOST)
@@ -88,5 +89,6 @@ func (r *router) registerTemplateFunction(e *gin.Engine) {
 	e.FuncMap = template.FuncMap{
 		"DateFormat": utils.DateFormat,
 		"Add":        utils.Add,
+		"Mul":        utils.Mul,
 	}
 }
