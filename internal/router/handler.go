@@ -52,7 +52,7 @@ func (r *router) SetupHandlers() error {
 	h.Use(r.errorHandlerMiddleware.Error())
 	h.Use(r.observerMiddleware.Observer())
 	h.GET("/", r.Index)
-	h.GET("/articles", r.Index)
+	h.GET("/articles/", r.Index)
 	h.GET("/article/:id", r.Article)
 	h.GET("/auth", r.Authentication)
 	h.POST("/auth", r.AuthenticationPOST)
@@ -63,7 +63,8 @@ func (r *router) SetupHandlers() error {
 		adminPanel.POST("/new/article", r.NewArticlePOST)
 		adminPanel.GET("/new/category", r.NewCategory)
 		adminPanel.POST("/new/category", r.NewCategoryPOST)
-		adminPanel.GET("/actions", r.DashboardActions)
+		adminPanel.GET("/actions/:page", r.DashboardActions)
+		adminPanel.GET("/actions/", r.DashboardActions)
 	}
 	r.registerTemplateFunction(h)
 	h.LoadHTMLGlob("web/**/*")

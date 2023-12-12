@@ -28,15 +28,10 @@ func Run() error {
 
 	storageDAO := storage.NewDAO(box, storageProvider)
 	cacheProvider := provider.NewCache(box)
-
 	sessionService := service.NewSession(box, cacheProvider)
-
 	decompressorFile := service.NewDecompressorFile(box)
-
 	md := service.NewMD(box)
-
 	ip := service.NewIp(box)
-
 	attachmentStorage, err := service.NewAttachmentStorage(box)
 	if err != nil {
 		return err
@@ -47,9 +42,7 @@ func Run() error {
 	)
 
 	authMiddleware := middleware.NewAuth(box, sessionService)
-
 	observable := middleware.NewObserver(box, sessionService, ip, storageDAO)
-
 	errorHandlerMiddleware := middleware.NewErrorHandler(box)
 
 	r := router.NewRouter(box, mainController, authMiddleware, errorHandlerMiddleware, observable)
