@@ -25,7 +25,7 @@ type MainController interface {
 	Articles() ([]*html.PreviewArticle, error)
 	NewCategory(account *dto.Account) (*html.NewCategory, error)
 	CreateNewCategory(account *dto.Account, form *dto.FormCategory) error
-	ViewActions() ([]html.Action, error)
+	ViewActions(page *dto.Page) (*html.Actions, error)
 }
 
 func NewMainController(

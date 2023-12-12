@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+type Number interface {
+	int | int8 | int16 | int32 |
+		uint | uint8 | uint16 | uint32 |
+		float32 | float64
+}
+
 func HashPassword(password string) (*string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	if err != nil {
@@ -42,4 +48,20 @@ func PrefixString(text string, words int) string {
 		actualWords = len(parts) - 1
 	}
 	return strings.Join(parts[:actualWords], " ")
+}
+
+func Max[T Number](x, y T) T {
+	if x > y {
+		return x
+	}
+
+	return y
+}
+
+func Min[T Number](x, y T) T {
+	if x < y {
+		return x
+	}
+
+	return y
 }

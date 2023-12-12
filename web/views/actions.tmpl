@@ -9,7 +9,7 @@
     <div class="d-flex my-full-height">
         {{ template "layouts/dashboardMenu.tmpl" "/admin/actions"}}
         <main class="container">
-            <div class="mx-4 my-1">
+            <div class="mx-4 my-4">
                 <table class="table table-hover dashboard-table-round table-bordered">
                     <thead class="table-dark">
                         <tr>
@@ -24,7 +24,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{ range $idx, $item := . }}
+                        {{ range $idx, $item := .Actions }}
                             <tr>
                                 <th scope="row">{{ 1 | Add $idx }}</th>
                                 <td>{{ $item.IP }}</td>
@@ -39,6 +39,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ template "layouts/pagination.tmpl" .Pagination}}
         </main>
     </div>
     {{ template "layouts/scripts.tmpl" .}}

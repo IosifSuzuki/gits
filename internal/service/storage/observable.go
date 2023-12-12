@@ -12,7 +12,8 @@ type ObservableRepository interface {
 	RetrieveIp(ip string) (*stor.Ip, error)
 	ExistsIp(ip string) (bool, error)
 	CreateNewObservable(observable *stor.Observable) error
-	RetrieveObservables() ([]stor.Observable, error)
+	Observables(page int, batch int) ([]stor.Observable, error)
+	LenObservables() (uint, error)
 }
 
 type observableRepository struct {
@@ -89,4 +90,31 @@ func (o *observableRepository) RetrieveObservables() ([]stor.Observable, error) 
 	}
 
 	return observables, nil
+}
+
+func (o *observableRepository) Observables(page int, batch int) ([]stor.Observable, error) {
+	log := o.container.GetLogger()
+	conn := o.storageProvider.GetConnection()
+
+	var observables []stor.Observable
+	query := conn.Order("updated_at desc").Preload("Ip").Preload("Account")
+	if err := query.Scopes(Pagination(page, batch)).Find(&observables).Error; err != nil {
+		log.Error("observables with pagination has failed", zap.Error(err))
+		return nil, err
+	}
+
+	return observables, nil
+}
+
+func (o *observableRepository) LenObservables() (uint, error) {
+	log := o.container.GetLogger()
+	conn := o.storageProvider.GetConnection()
+
+	var rows uint
+	if err := conn.Model(stor.Observable{}).Select("count(*)").Find(&rows).Error; err != nil {
+		log.Error("retrieve observables has failed", zap.Error(err))
+		return 0, err
+	}
+
+	return rows, nil
 }
