@@ -10,12 +10,15 @@ import (
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 	"gits/internal/container"
+	"gits/internal/utils"
 	"go.uber.org/zap"
 	"io"
+	"strings"
 )
 
 type MD interface {
 	RenderMdToHTML(md []byte, attachmentIdentifiers map[string]string) ([]byte, error)
+	RenderMdToPreviewHTML(md []byte, words uint) ([]byte, error)
 }
 
 type md struct {
@@ -34,6 +37,19 @@ func NewMD(container container.Container) MD {
 	}
 }
 
+func (m *md) RenderMdToPreviewHTML(md []byte, words uint) ([]byte, error) {
+	ext := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(ext)
+	doc := p.Parse(md)
+	htmlFlags := html.CommonFlags
+	opts := html.RendererOptions{
+		Flags:          htmlFlags,
+		RenderNodeHook: m.PreparePreviewHook(words),
+	}
+	renderer := html.NewRenderer(opts)
+	return markdown.Render(doc, renderer), nil
+}
+
 func (m *md) RenderMdToHTML(md []byte, attachmentIdentifiers map[string]string) ([]byte, error) {
 	ext := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(ext)
@@ -42,7 +58,7 @@ func (m *md) RenderMdToHTML(md []byte, attachmentIdentifiers map[string]string) 
 	htmlFlags := html.CommonFlags
 	opts := html.RendererOptions{
 		Flags:          htmlFlags,
-		RenderNodeHook: m.RenderHook,
+		RenderNodeHook: m.RenderContentHook,
 	}
 	renderer := html.NewRenderer(opts)
 	return markdown.Render(doc, renderer), nil
@@ -64,7 +80,7 @@ func (m *md) modifyAct(doc ast.Node, attachmentIdentifiers map[string]string) as
 	return doc
 }
 
-func (m *md) RenderHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
+func (m *md) RenderContentHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
 	log := m.GetLogger()
 
 	if codeBlock, ok := node.(*ast.CodeBlock); ok {
@@ -83,9 +99,44 @@ func (m *md) RenderHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStat
 	return ast.GoToNext, false
 }
 
-func (m *md) htmlHighlight(w io.Writer, sourceCode, lang, defaultLang string) error {
-	log := m.GetLogger()
+func (m *md) PreparePreviewHook(words uint) html.RenderNodeFunc {
+	var currentWords uint = 0
 
+	return func(_ io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
+		switch node := node.(type) {
+		case *ast.Heading:
+			return ast.SkipChildren, true
+		case *ast.CodeBlock:
+			return ast.SkipChildren, true
+		case *ast.Image:
+			return ast.SkipChildren, true
+		case *ast.Link:
+			return ast.SkipChildren, true
+		case *ast.List:
+			return ast.SkipChildren, true
+		case *ast.Table:
+			return ast.SkipChildren, true
+		case *ast.Paragraph:
+			if !utils.MarkdownHasTextNode(node) {
+				return ast.SkipChildren, true
+			} else if !entering {
+				return ast.GoToNext, false
+			} else if currentWords > words {
+				return ast.Terminate, true
+			}
+
+			text := utils.MarkdownTextContent(node)
+			words := strings.Split(text, " ")
+			currentWords += uint(len(words))
+
+			return ast.GoToNext, false
+		}
+
+		return ast.GoToNext, false
+	}
+}
+
+func (m *md) htmlHighlight(w io.Writer, sourceCode, lang, defaultLang string) error {
 	if lang == "" {
 		lang = defaultLang
 	}
@@ -98,8 +149,6 @@ func (m *md) htmlHighlight(w io.Writer, sourceCode, lang, defaultLang string) er
 	}
 	l = chroma.Coalesce(l)
 
-	log.Debug("detect language in code", zap.String("lang", l.Config().Name))
-
 	it, err := l.Tokenise(nil, sourceCode)
 	if err != nil {
 		return err
@@ -107,6 +156,5 @@ func (m *md) htmlHighlight(w io.Writer, sourceCode, lang, defaultLang string) er
 
 	styleName := "xcode"
 	highlightStyle := styles.Get(styleName)
-	log.Debug("obtain highlight style", zap.String("style", highlightStyle.Name))
 	return m.htmlCodeFormatter.Format(w, highlightStyle, it)
 }

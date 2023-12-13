@@ -2,11 +2,9 @@ package central
 
 import (
 	"fmt"
-	strip "github.com/grokify/html-strip-tags-go"
 	"gits/internal/model/dto"
 	"gits/internal/model/html"
 	"gits/internal/service"
-	"gits/internal/utils"
 	"go.uber.org/zap"
 	"html/template"
 )
@@ -30,17 +28,14 @@ func (m *mainController) Articles(page *dto.Page) (*html.Articles, error) {
 
 	previewArticles := make([]html.PreviewArticle, 0, len(storArticles))
 	for _, storArticle := range storArticles {
-		htmlContent, err := m.convertMdToHtmlContent(&storArticle)
+		htmlContent, err := m.convertMdToHtmlPreview(&storArticle, 70)
 		if err != nil {
 			log.Error("convert mark down to html has failed", zap.Error(err))
 
 			return nil, err
 		}
 
-		stripHtmlContent := strip.StripTags(*htmlContent)
-		content := utils.PrefixString(stripHtmlContent, 70)
-
-		contentHTML := template.HTML(content)
+		contentHTML := template.HTML(*htmlContent)
 		date := storArticle.UpdatedAt
 		previewArticles = append(previewArticles, html.PreviewArticle{
 			Id:      int(storArticle.ID),

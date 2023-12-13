@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
@@ -68,4 +69,39 @@ func Min[T Number](x, y T) T {
 	}
 
 	return y
+}
+
+func MarkdownHasTextNode(node ast.Node) bool {
+	if leaf := node.AsLeaf(); leaf != nil {
+		if textNode, ok := node.(*ast.Text); ok && len(textNode.Literal) > 0 {
+			return true
+		}
+	}
+	for _, child := range node.GetChildren() {
+		if MarkdownHasTextNode(child) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func MarkdownTextContent(node ast.Node) string {
+	if leaf := node.AsLeaf(); leaf != nil {
+		switch node := node.(type) {
+		case *ast.Text:
+			return string(node.Literal)
+		default:
+			return ""
+		}
+	}
+	var result string
+	for _, child := range node.GetChildren() {
+		childText := MarkdownTextContent(child)
+		if len(childText) > 0 {
+			result += childText
+		}
+	}
+
+	return result
 }
