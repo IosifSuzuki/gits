@@ -46,10 +46,6 @@ body {
     display: block;
 }
 
-.my-nav-option-item {
-    display: inline-block;
-}
-
 .my-nav-option-link:hover {
     text-decoration: underline;
     color: var(--textColor);
