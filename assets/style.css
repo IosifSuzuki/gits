@@ -2,6 +2,8 @@
     --textColor: #424242;
     --descriptionColor: #828282;
     --linkColor: #1756a9;
+    --backgroundColor: #FFFFFF;
+    --seperatorColor: rgb(0, 0, 0, 0.1);
 }
 
 body {
@@ -28,7 +30,7 @@ body {
 .my-center {
     text-align: center;
 }
-.my-text-right {
+.my-menu-alight {
     text-align: right;
 }
 
@@ -42,6 +44,10 @@ body {
     text-decoration: none;
     color: #424242;
     display: block;
+}
+
+.my-nav-option-item {
+    display: inline-block;
 }
 
 .my-nav-option-link:hover {
@@ -136,3 +142,53 @@ body {
     width: 50%;
 }
 
+.my-display-none {
+    display: none;
+}
+
+@media only screen and (min-width: 767px) {
+
+    .my-nav-icon {
+        display: none;
+    }
+
+    #my-portrait-nav-menu {
+        display: none;
+    }
+
+}
+
+
+@media only screen and (max-width: 767px) {
+
+    .my-portrait-nav-item {
+        text-align: left;
+        border-bottom: 1px solid var(--seperatorColor);
+    }
+
+    .my-main-nav-menu {
+        display: none;
+    }
+
+    #my-portrait-nav-menu {
+        position: fixed;
+        left: 0;
+        top: 55px;
+        transition: all 0.3s ease-in-out;
+        height: calc(100vh - 55px);
+        width: 100%;
+        background: var(--backgroundColor);
+    }
+
+    .my-nav-icon {
+        width: 24px;
+        height: 100%;
+        display: inline-block;
+    }
+
+    .my-nav-icon > img {
+        height: 100%;
+        width: 100%;
+    }
+
+}
