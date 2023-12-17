@@ -65,6 +65,10 @@ func (o *observer) Observer() gin.HandlerFunc {
 		storIP, err := o.ObtainStorageIp(ip)
 		if err != nil {
 			log.Error("obtain storage ip has failed", zap.Error(err))
+			storIP, err = o.SaveStorageIp(ip)
+		}
+		if err != nil {
+			log.Error("save storage ip has failed", zap.Error(err))
 		}
 
 		ua := ctx.GetHeader(constant.UserAgentHeaderKey)
@@ -73,7 +77,6 @@ func (o *observer) Observer() gin.HandlerFunc {
 		storObservable := stor.Observable{
 			AccountId: accountId,
 			IpId:      storIP.ID,
-			Ip:        storIP,
 			Browser:   &userAgentModel.Name,
 			OS:        &userAgentModel.OS,
 			OSVersion: &userAgentModel.OSVersion,

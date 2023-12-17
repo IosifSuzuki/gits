@@ -4,20 +4,34 @@ services:
   server:
     container_name: "gits-server"
     build:
-      context: .
+      context: ./../..
       dockerfile: dev.Dockerfile
     restart: unless-stopped
-    depends_on:
-      - database
-      - cache
     env_file:
       - .env
+    depends_on:
+      - cache
+      - database
     volumes:
       - data:/usr/src/app/
     networks:
       - local-network
     ports:
       - '${HOST_PORT}:${HOST_PORT}'
+      - '40000:40000' # delve tool
+
+  database:
+    container_name: "gits-postgresql"
+    image: postgres:alpine
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - local-network
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - data:/var/lib/postgresql/data
 
   cache:
     container_name: "gits-redis"
