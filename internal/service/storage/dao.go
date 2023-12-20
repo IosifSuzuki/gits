@@ -9,6 +9,7 @@ type DAO interface {
 	GetAccountRepository() AccountRepository
 	GetArticleRepository() ArticleRepository
 	GetObservableRepository() ObservableRepository
+	GetMessageRepository() MessageRepository
 }
 
 type dao struct {
@@ -33,4 +34,8 @@ func (d *dao) GetArticleRepository() ArticleRepository {
 
 func (d *dao) GetObservableRepository() ObservableRepository {
 	return NewObservableRepository(d.container, d.storageProvider)
+}
+
+func (d *dao) GetMessageRepository() MessageRepository {
+	return NewMessageRepository(d.container, d.storageProvider)
 }

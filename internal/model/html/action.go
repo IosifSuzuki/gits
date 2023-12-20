@@ -2,8 +2,8 @@ package html
 
 import (
 	"fmt"
-	"gits/internal/helper"
 	stor "gits/internal/model/storage"
+	"gits/internal/utils"
 	"strings"
 	"time"
 )
@@ -57,10 +57,10 @@ func getFlagURL(observable *stor.Observable) *string {
 
 	country := observable.Ip.Country
 	if country == nil {
-		flagURL = helper.String("https://www.kidlink.org//icons/e.gif")
+		flagURL = utils.String("https://www.kidlink.org//icons/e.gif")
 	} else {
-		countryIso2Code := helper.String(strings.ToLower(*country))
-		flagURL = helper.String(fmt.Sprintf("https://www.kidlink.org//icons/f0-%s.gif", *countryIso2Code))
+		countryIso2Code := utils.String(strings.ToLower(*country))
+		flagURL = utils.String(fmt.Sprintf("https://www.kidlink.org//icons/f0-%s.gif", *countryIso2Code))
 	}
 
 	return flagURL

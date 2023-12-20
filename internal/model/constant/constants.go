@@ -21,4 +21,6 @@ const (
 	UserAgentHeaderKey = "User-Agent"
 
 	S3BucketKey = "S3_BUCKET"
+
+	ReturnValueQueryParameter = "return_value"
 )
