@@ -10,7 +10,7 @@
         {{ template "layouts/dashboardMenu.tmpl" "/admin/new/article" }}
         <main class="container">
             <div class="d-flex align-items-center justify-content-center my-full-height">
-                <form action="/admin/new/article" class="my-half-container" method="post" enctype='multipart/form-data'>
+                <form action="/admin/new/article" class="container" method="post" enctype='multipart/form-data'>
                     <div class="mb-3">
                         <label for="publisher" class="form-label">Publisher</label>
                         <input type="text" class="form-control" name="publisher" id="publisher" value="{{.PublisherName}}" readonly>

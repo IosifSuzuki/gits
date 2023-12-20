@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -9,8 +11,8 @@ import (
 
 type Number interface {
 	int | int8 | int16 | int32 |
-		uint | uint8 | uint16 | uint32 |
-		float32 | float64
+	uint | uint8 | uint16 | uint32 |
+	float32 | float64
 }
 
 func HashPassword(password string) (*string, error) {
@@ -104,4 +106,31 @@ func MarkdownTextContent(node ast.Node) string {
 	}
 
 	return result
+}
+
+func String(str string) *string {
+	return &str
+}
+
+func MarshalQueryParam(value any) (*string, error) {
+	valueJSON, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+
+	base64ValueText := base64.StdEncoding.EncodeToString(valueJSON)
+	return &base64ValueText, err
+}
+
+func Unmarshal(base64QueryParam string, value any) error {
+	jsonQueryParam, err := base64.StdEncoding.DecodeString(base64QueryParam)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(jsonQueryParam, &value); err != nil {
+		return err
+	}
+
+	return err
 }

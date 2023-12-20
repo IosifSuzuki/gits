@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/spf13/cobra"
 	"gits/internal/utils"
+	"gits/pkg/logger"
+	"go.uber.org/zap"
 )
+
+var log = logger.NewLogger(logger.DebugLevel)
 
 var generatePasswordCmd = cobra.Command{
 	Use:   "pass",
@@ -16,26 +19,26 @@ var generatePasswordCmd = cobra.Command{
 
 func main() {
 	if err := generatePasswordCmd.Execute(); err != nil {
-		fmt.Printf("error: command pass has failed %v", err)
+		log.Error("command failed", zap.Error(err))
 		return
 	}
 }
 
 func generatePassword(_ *cobra.Command, args []string) {
 	if len(args) <= 1 {
-		fmt.Printf("error: please specify a password")
+		log.Error("please specify a password as argument")
 		return
 	}
 	password := args[1]
 	hashPassword, err := utils.HashPassword(password)
 	if err != nil {
-		fmt.Printf("error: generate hash password has failed with error: %v", err)
+		log.Error("generate hash password has failed", zap.Error(err))
 		return
 	} else if hashPassword == nil {
-		fmt.Printf("error: ash password has nil value")
+		log.Error("hash password has nil value")
 		return
 	}
 	hashPasswordBytes := []byte(*hashPassword)
 	base64HashPass := base64.StdEncoding.EncodeToString(hashPasswordBytes)
-	fmt.Printf("hash password has generated: %v", base64HashPass)
+	log.Info("result", zap.String("base64 hash password", base64HashPass))
 }

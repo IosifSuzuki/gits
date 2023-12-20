@@ -1,0 +1,59 @@
+{{ define "views/contact.tmpl" }}
+
+<!doctype html>
+<html lang="en">
+<head>
+  {{ template "layouts/head.tmpl" .}}
+</head>
+<body>
+  {{ template "layouts/header.tmpl" .}}
+
+  <main class="my-page-content">
+    <div class="container">
+      <h2 class="my-h">Contact</h2>
+      <p class="my-1">Drop me a message using form below</p>
+
+      {{ if .contactMe.FieldErrs }}
+        <div class="my-3">
+          {{ range .contactMe.FieldErrs }}
+          <div class="alert alert-danger" role="alert">
+            {{ .Message }}
+          </div>
+          {{ end }}
+        </div>
+      {{ else if .contactMe.FormSubmitted }}
+        <div class="my-3">
+          <div class="alert alert-success" role="alert">
+            {{ .contactMe.FormSubmittedMessage }}
+          </div>
+        </div>
+      {{ end }}
+
+      <form action="/contact/me" method="post" >
+        <div class="form-group my-4">
+          <label class="mb-1" for="full_name">Full Name</label>
+          <input type="text" name="full_name" class="form-control my-input" id="full_name" placeholder="First & Last Name" value="{{ if .contactMe.FullName }}{{ .contactMe.FullName }}{{ end }}">
+        </div>
+        <div class="form-group my-4">
+          <label class="mb-1" for="email">Email address</label>
+          <input type="email" name="email" class="form-control my-input" id="email" aria-describedby="emailHelp" placeholder="email@domain" value="{{ if .contactMe.Email }}{{ .contactMe.Email }}{{ end }}">
+          <small id="emailHelp" class="form-text text-muted ">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group my-4">
+          <div class="form-group">
+            <label class="mb-1" for="message">Message</label>
+            <textarea class="form-control my-input" id="message" rows="9" name="message" placeholder="Your message">{{ if .contactMe.Message }}{{ .contactMe.Message }}{{ end }}</textarea>
+          </div>
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-dark btn-block ">Send a message</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  {{ template "layouts/footer.tmpl" . }}
+  {{ template "layouts/scripts.tmpl" .}}
+</body>
+
+{{ end }}
