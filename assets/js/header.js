@@ -1,10 +1,18 @@
 
 function main() {
     let toggleButton = document.getElementById("portrait-nav-toggle")
+    if (toggleButton) {
+        toggleButton.addEventListener("click", function () {
+            portraitToggleHandler(toggleButton)
+        })
+    }
 
-    toggleButton.addEventListener("click", function () {
-        portraitToggleHandler(toggleButton)
-    })
+    let backButton = document.getElementById("back-button")
+    if (backButton) {
+        backButton.onclick = function (e) {
+            window.history.back()
+        }
+    }
 }
 
 function portraitToggleHandler(event) {

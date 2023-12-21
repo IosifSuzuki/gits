@@ -6,8 +6,16 @@
 </head>
 <body>
 <main class="container">
-    <div class="d-flex align-items-center justify-content-center my-full-height">
-        <form action="/auth" class="my-full-width" method="post">
+    <div class="row py-2">
+        <div>
+            <a class="my-nav-option-link" id="back-button" href="#">
+                <img class="my-back-icon" src="/assets/navigation-icons/back.svg" alt="back" />Back
+            </a>
+        </div>
+    </div>
+    <div class="row align-items-center my-full-height">
+        <div class="col-2"></div>
+        <form action="/auth" class="col-8" method="post">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" name="username" class="form-control my-input" placeholder="username" id="username">
@@ -20,6 +28,7 @@
                 <button type="submit" class="btn btn-dark btn-block">Submit</button>
             </div>
         </form>
+        <div class="col-2"></div>
     </div>
 </main>
 {{ template "layouts/scripts.tmpl" .}}
