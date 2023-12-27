@@ -1,18 +1,55 @@
 {{ define "layouts/dashboardMenu.tmpl" }}
 
-<div class="dashboard-side-menu">
-    <div class="header-box">
-        <h4 class="px-2 py-2 text-center">Dashboard</h4>
-        <ul class="list-unstyled px-2">
-            <li {{ if eq . "/admin/new/article" }} class="active" {{ end }}><a href="/admin/new/article" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-signs-post"></i> Create post</a></li>
-            <li {{ if eq . "/admin/new/category" }} class="active" {{ end }} ><a href="/admin/new/category" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-tag"></i> Create category</a></li>
-            <li {{ if eq . "/admin/actions" }} class="active" {{ end }} ><a href="/admin/actions" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-location-arrow"></i> Actions</a></li>
-        </ul>
-        <hr class="dashboard-hr-color" />
-        <ul class="list-unstyled px-2">
-            <li><a href="/" class="dashboard-link text-decoration-none d-block px-3 py-3"><i class="fa-solid fa-chevron-left"></i> Back</a></li>
-        </ul>
+<nav class="my-main-navbar">
+    <div class="container d-flex justify-content-between">
+        <div>
+            <a class="py-3 my-nav-option-link my-font-weight-bold" href="#">Dashboard</a>
+        </div>
+        <div>
+            <a href="#" id="portrait-nav-toggle" class="my-nav-icon">
+                <img src="/assets/navigation-icons/nav-menu.svg" alt="logo" />
+            </a>
+            <ul class="my-plain-ul my-main-nav-menu">
+                <li class="my-drop-down-expander d-inline-block me-2">
+                    <a class="py-3 my-nav-option-link" href="#">Post<img class="my-drop-down-icon" src="/assets/navigation-icons/drop-down.svg" alt="drop down icon" /></a>
+                    <ul class="my-drop-down-list my-plain-ul">
+                        <li class="px-2 my-drop-down-item"><a href="/admin/new/article">Create</a></li>
+                        <li class="px-2 my-drop-down-item"><a href="/admin/article">View</a></li>
+                    </ul>
+                </li>
+                <li class="my-drop-down-expander d-inline-block me-2">
+                    <a class="py-3 my-nav-option-link" href="#">Category<img class="my-drop-down-icon" src="/assets/navigation-icons/drop-down.svg" alt="drop down icon" /></a>
+                    <ul class="my-drop-down-list my-plain-ul">
+                        <li class="px-2 my-drop-down-item"><a href="/admin/new/category">Create</a></li>
+                    </ul>
+                </li>
+                <li class="d-inline-block me-2">
+                    <a class="py-3 my-nav-option-link" href="/admin/actions">Actions</a>
+                </li>
+                <li class="d-inline-block me-2">
+                    <a class="py-3 my-nav-option-link" href="/">Back</a>
+                </li>
+            </ul>
+            <div id="my-portrait-nav-menu" class="my-display-none">
+                <div class="container">
+                    <ul class="my-plain-ul">
+                        <li class="my-portrait-nav-item">
+                            <a class="py-3 my-nav-option-link active" href="/admin/new/article">Create post</a>
+                        </li>
+                        <li class="my-portrait-nav-item">
+                            <a class="py-3 my-nav-option-link" href="/admin/new/category">Create category</a>
+                        </li>
+                        <li class="my-portrait-nav-item">
+                            <a class="py-3 my-nav-option-link" href="/admin/actions">Actions</a>
+                        </li>
+                        <li class="my-portrait-nav-item">
+                            <a class="py-3 my-nav-option-link" href="/">Back</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</nav>
 
 {{ end }}

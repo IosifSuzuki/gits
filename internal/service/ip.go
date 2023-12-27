@@ -27,7 +27,7 @@ func (i *ip) GeoLocation(ip string) (*dto.GeoLocation, error) {
 	log := i.GetLogger()
 	conf := i.GetConfig()
 
-	url := fmt.Sprintf("http://ipinfo.io/%s?token=%s", ip, conf.IpInfo.Token)
+	url := fmt.Sprintf("https://ipinfo.io/%s?token=%s", ip, conf.IpInfo.Token)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Error("make request to retrieve info about ip has failed", zap.Error(err))

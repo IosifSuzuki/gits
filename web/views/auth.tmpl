@@ -14,8 +14,7 @@
         </div>
     </div>
     <div class="row align-items-center my-full-height">
-        <div class="col-2"></div>
-        <form action="/auth" class="col-8" method="post">
+        <form action="/auth" class="offset-2 col-8" method="post">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" name="username" class="form-control my-input" placeholder="username" id="username">
@@ -28,7 +27,6 @@
                 <button type="submit" class="btn btn-dark btn-block">Submit</button>
             </div>
         </form>
-        <div class="col-2"></div>
     </div>
 </main>
 {{ template "layouts/scripts.tmpl" .}}

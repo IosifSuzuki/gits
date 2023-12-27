@@ -3,29 +3,30 @@
 <html lang="en">
 <head>
     {{ template "layouts/head.tmpl" .}}
-    <link rel="stylesheet" href="/assets/dashboard.css" />
 </head>
 <body>
-    <div class="d-flex my-full-height">
-        {{ template "layouts/dashboardMenu.tmpl" "/admin/new/category" }}
-        <main class="container">
-            <div class="d-flex align-items-center justify-content-center my-full-height">
-                <form action="/admin/new/category" class="my-half-container" method="post">
-                    <div class="mb-3">
-                        <label for="publisher" class="form-label">Publisher</label>
-                        <input type="text" class="form-control" name="publisher" id="publisher" value="{{.PublisherName}}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="title" name="title" placeholder="category name">
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-dark btn-block">Submit</button>
-                    </div>
-                </form>
-            </div>
-        </main>
-    </div>
+    {{ template "layouts/dashboardMenu.tmpl" .}}
+
+    <main class="container">
+        <div class="my-full-height my-page-content">
+            <h2 class="my-h">New Category</h2>
+            <p class="my-3">Create category for link them to article</p>
+            <form action="/admin/new/category" method="post">
+                <div class="mb-3">
+                    <label for="publisher" class="form-label">Publisher</label>
+                    <input type="text" class="form-control" name="publisher" id="publisher" value="{{.PublisherName}}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="title" class="form-label">Category</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="category name">
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-dark btn-block">Submit</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
     {{ template "layouts/scripts.tmpl" . }}
 </body>
 {{ end }}
