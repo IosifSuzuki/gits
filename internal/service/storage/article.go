@@ -15,6 +15,8 @@ type ArticleRepository interface {
 	AvailableCategories() ([]stor.Category, error)
 	CreateNewCategory(category *stor.Category) error
 	Categories(ids []int) ([]stor.Category, error)
+	PaginationCategories(page int, batch int) ([]stor.Category, error)
+	LenCategories(page uint, batch uint) (uint, error)
 }
 
 type articleRepository struct {
@@ -110,9 +112,37 @@ func (a *articleRepository) Articles(page int, batch int) ([]stor.Article, error
 	var articles []stor.Article
 	query := conn
 	if err := query.Scopes(Pagination(page, batch)).Find(&articles).Error; err != nil {
-		log.Error("observables with pagination has failed", zap.Error(err))
+		log.Error("articles with pagination has failed", zap.Error(err))
 		return nil, err
 	}
 
 	return articles, nil
+}
+
+func (a *articleRepository) PaginationCategories(page int, batch int) ([]stor.Category, error) {
+	log := a.container.GetLogger()
+	conn := a.storageProvider.GetConnection()
+
+	var categories []stor.Category
+	query := conn
+	if err := query.Scopes(Pagination(page, batch)).Find(&categories).Error; err != nil {
+		log.Error("categories with pagination has failed")
+
+		return nil, err
+	}
+
+	return categories, nil
+}
+
+func (a *articleRepository) LenCategories(page uint, batch uint) (uint, error) {
+	conn := a.storageProvider.GetConnection()
+	log := a.container.GetLogger()
+
+	var rows uint
+	if err := conn.Model(stor.Category{}).Select("count(*)").Find(&rows).Error; err != nil {
+		log.Error("retrieve articles count has failed", zap.Error(err))
+		return 0, err
+	}
+
+	return rows, nil
 }
