@@ -28,6 +28,8 @@ type MainController interface {
 	ViewActions(page *dto.Page) (*html.Actions, error)
 	ContactMe(contactMe *dto.ContactMe) (*html.ContactMe, error)
 	NewMessage(message *dto.NewMessage) error
+	ViewCategories(page *dto.Page) (*html.Categories, error)
+	ViewArticles(page *dto.Page) (*html.Articles, error)
 }
 
 func NewMainController(
