@@ -57,10 +57,10 @@ func getFlagURL(observable *stor.Observable) *string {
 
 	country := observable.Ip.Country
 	if country == nil {
-		flagURL = utils.String("https://www.kidlink.org//icons/e.gif")
+		flagURL = utils.String("https://upload.wikimedia.org/wikipedia/commons/b/b9/Solid_red.png")
 	} else {
-		countryIso2Code := utils.String(strings.ToLower(*country))
-		flagURL = utils.String(fmt.Sprintf("https://www.kidlink.org//icons/f0-%s.gif", *countryIso2Code))
+		countryIso2Code := utils.String(strings.ToUpper(*country))
+		flagURL = utils.String(fmt.Sprintf("https://flagsapi.com/%s/flat/64.png", *countryIso2Code))
 	}
 
 	return flagURL

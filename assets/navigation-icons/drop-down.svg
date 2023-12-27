@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="26px" viewBox="0 0 25 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ic_back 2</title>
+    <g id="My-appointments" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1.0---My-appointments_WR" transform="translate(-10.000000, -36.000000)" fill="#171A1C" fill-rule="nonzero">
+            <g id="ic_back" transform="translate(10.000000, 30.000000)">
+                <g id="ic_back-2" transform="translate(0.000000, 6.500000)">
+                    <path d="M17.604235,13.4139411 L9.30683563,21.3518629 C8.77902081,21.8570713 7.92325955,21.8570713 7.39570097,21.3518629 C6.86809968,20.8471039 6.86809968,20.0284333 7.39570097,19.5237151 L14.7376184,12.4998672 L7.3959145,5.47626443 C6.86831321,4.97130113 6.86831321,4.15271226 7.3959145,3.64795325 C7.92351579,3.14298994 8.77923434,3.14298994 9.30704917,3.64795325 L17.6044485,11.5859976 C17.8682492,11.8384997 18,12.1690813 18,12.4998264 C18,12.8307348 17.8679929,13.1615616 17.604235,13.4139411 Z" id="ic_back" transform="translate(12.500000, 12.500000) scale(-1, 1) rotate(90.000000) translate(-12.500000, -12.500000) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
