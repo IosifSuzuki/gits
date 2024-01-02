@@ -1,3 +1,4 @@
+"use strict";
 
 function main() {
     let toggleButton = document.getElementById("portrait-nav-toggle")

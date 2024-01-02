@@ -62,6 +62,7 @@ func (r *router) SetupHandlers() error {
 	h.GET("/contact/me", r.ContactMe)
 	h.GET("/auth", r.Authentication)
 	h.POST("/auth", r.AuthenticationPOST)
+	h.GET("/foxhole/artillery-calculator", r.FoxholeArtilleryCalculator)
 	adminPanel := h.Group("/admin")
 	adminPanel.Use(r.authMiddleware.Authorization())
 	{

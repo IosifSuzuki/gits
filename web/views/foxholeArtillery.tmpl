@@ -1,0 +1,96 @@
+{{ define "views/foxholeArtillery.tmpl" }}
+
+<!doctype html>
+<html lang="en">
+<head>
+    {{ template "layouts/head.tmpl" .}}
+</head>
+<body>
+    {{ template "layouts/header.tmpl" .}}
+
+    <main class="my-page-content">
+        <div class="container">
+            <h1 class="my-h">Artillery calculator in <a href="https://store.steampowered.com/app/505460/Foxhole/">Foxhole</a></h1>
+            <div class="mt-4 alert alert-info d-none" id="instruction" role="alert">
+                <p>
+                    You are a <b>spotter</b>. You must have <b>binoculars</b> in your inventory. <b>Binoculars</b> can determine the <b>distance</b> and <b>azimuth</b> to any position relative to the <b>spotter</b>. There is wind in the <a href="https://store.steampowered.com/app/505460/Foxhole/">Foxhole</b></a>. Wind affects artillery fire. Wind in the game has <b>five levels(strength)</b>. You could get <b>azimuth</b>, <b>direction</b> from <b>towerwatch</b>. The wind on the map has different levels and directions. Therefore, there is no need to use wind correction on distant targets!
+                </p>
+                To use this calculator:
+                <ol>
+                    <li>With help of <b>binoculars</b> you can determine: <b>distance</b> and <b>azimuth</b> to the location of the target. In section <b>Target</b> fill these fields</li>
+                    <li>With help of <b>binoculars</b> you can determine: <b>distance</b> and <b>azimuth</b> to our altelery. In section <b>Artillery</b> fill these fields</li>
+                    <li>If you would use wind correction click <b>Add wind correction</b></li>
+                    <li>With help of <b>towerwatch</b> you can determine: <b>level</b> and <b>azimuth</b> of wind.</li>
+                </ol>
+            </div>
+            <section>
+                <h2>Target</h2>
+
+                <div class="mb-3">
+                    <label class="form-label">Distance</label>
+                    <input type="number" class="form-control my-input" id="target_distance" placeholder="from spotter to target">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Azimuth</label>
+                    <input type="number" class="form-control my-input" id="target_azimuth" placeholder="from spotter to target">
+                </div>
+            </section>
+            <section class="mt-4">
+                <h2>Artillery</h2>
+
+                <div class="mb-3">
+                    <label class="form-label">Distance</label>
+                    <input type="number" class="form-control my-input" id="artillery_distance" placeholder="from spotter to artillery">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Azimuth</label>
+                    <input type="number" class="form-control my-input" id="artillery_azimuth" placeholder="from spotter to artillery">
+                </div>
+            </section>
+            <section class="mt-4 d-none" id="wind-correction-section">
+                <h2>Wind correction</h2>
+                <div class="mb-3">
+                    <label class="form-label">Wind level</label>
+                    <select class="form-select my-input" aria-label="select wind level" id="wind_level">
+                        <option value="0" selected>None</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Wind azimuth</label>
+                    <input type="number" class="form-control my-input" id="wind_azimuth" placeholder="wind azimuth">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Altillery Type</label>
+                    <select class="form-select my-input" aria-label="select altillery type" id="artillery-type">
+                        <option value="0" selected>None</option>
+                        <option value="1">120mm</option>
+                        <option value="2">150mm</option>
+                        <option value="3">300mm</option>
+                    </select>
+                </div>
+            </section>
+
+            <div class="mt-4 alert alert-success d-none" id="message-result" role="alert"></div>
+
+            <div class="btn-group my-4 d-flex justify-content-center" role="group" aria-label="primary actions">
+                <button type="button" class="btn btn-outline-secondary" id="clear-button">Clear data</button>
+                <button type="button" class="btn btn-outline-primary" id="wind-direction-button">Add wind correction</button>
+                <button type="button" class="btn btn-outline-primary" id="compute-button">Compute</button>
+                <button type="button" class="btn btn-outline-primary" id="instruction-button">Instruction</button>
+            </div>
+        </div>
+    </main>
+
+    {{ template "layouts/footer.tmpl" . }}
+    {{ template "layouts/scripts.tmpl" .}}
+    <script src="/assets/js/artillery.js"></script>
+</body>
+</html>
+
+{{ end }}
